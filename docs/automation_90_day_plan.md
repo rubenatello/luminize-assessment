@@ -2,7 +2,7 @@
 
 ## Starting point
 
-The assignment confirms QuickBooks, REACH, and Google Sheets as business systems. Some Amazon data already reaches BigQuery through third-party APIs/ELT, and dbt is the transformation layer. I would keep that path, document its coverage, and add controls around it.
+Based on prior interview discussions. Some Amazon data already reaches BigQuery through third-party APIs/ELT, and dbt is the transformation layer. I would keep that path, document its coverage, and add controls around it.
 
 | Component | Role in the proposed architecture |
 |---|---|
