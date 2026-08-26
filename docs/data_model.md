@@ -31,7 +31,7 @@ The four assessment files land independently, then share governed product identi
 
 Settlement and PO facts converge in the profitability marts. The inventory snapshot remains a separately grained as-of fact.
 
-REACH is a confirmed source, but its exact entities and system-of-record responsibilities are not specified. Profile its API/exports, keys, history, and ownership before assigning facts to it.
+REACH is the financial reporting system. Profile its report definitions, adjustments, source lineage, refreshes, keys, and API/exports before using its outputs in Gold reconciliation.
 
 ## Main tables and keys
 

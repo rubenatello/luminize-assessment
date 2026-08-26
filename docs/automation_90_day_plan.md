@@ -2,13 +2,13 @@
 
 ## Starting point
 
-Based on prior interview discussions. Some Amazon data already reaches BigQuery through third-party APIs/ELT, and dbt is the transformation layer. I would keep that path, document its coverage, and add controls around it.
+Some Amazon data already reaches BigQuery through third-party APIs/ELT, and dbt is the transformation layer. REACH is the financial reporting system. I would keep that path, document its coverage, and add controls around it.
 
 | Component | Role in the proposed architecture |
 |---|---|
 | Amazon APIs/reports | Marketplace sales, fees, inventory, advertising, and returns source |
 | QuickBooks | Accounting ledger and reconciliation source |
-| REACH | Confirmed business source; profile its entities, API/exports, owner, and system-of-record responsibilities before modeling |
+| REACH | Financial reporting system; document report definitions, adjustments, lineage, refreshes, and API/export options |
 | Google Sheets | Governed manual mappings, overrides, and operational inputs |
 | BigQuery | Central warehouse, raw history, controls, and reporting data |
 | dbt | Silver/Gold transformations, tests, lineage, and documentation |
@@ -39,9 +39,9 @@ If the current connector only delivers flattened tables, I would first confirm w
 
 | Timing | Work | Exit criteria |
 |---|---|---|
-| **Days 1–30: observe and protect** | Inventory Amazon, QuickBooks, REACH, and Sheet feeds, owners, refresh times, history, and gaps. Profile REACH entities and identifiers. Add raw landing for critical feeds, run metadata, schema-key snapshots, retries/backfill, and initial alerts. Define SKU/ASIN/UOM ownership. | Critical feeds are replayable; REACH's role is documented; failures and payload changes are visible; no source row is silently discarded. |
-| **Days 31–60: stabilize and reconcile** | Build dbt Silver models with tolerant parsing and versioned rename rules. Add required-field, uniqueness, null-rate, identity, and amount tests. Publish stable Gold marts and reconcile Amazon activity to QuickBooks. | Brand/SKU profitability ties to source and accounting within approved tolerances; BI reads only Gold. |
-| **Days 61–90: close gaps and operate** | Add advertising-by-ASIN, storage detail, return reasons, and PO/receipt status. Use REACH for the operational facts discovery confirms it owns. Version governed Sheet inputs. Assign alert owners, write runbooks, test replay, and review service levels. | Fully loaded SKU economics use better drivers; inventory uses actual receipts/status; the team can recover a failed load without engineering heroics. |
+| **Days 1–30: observe and protect** | Inventory Amazon, QuickBooks, REACH, and Sheet feeds, owners, refreshes, history, and gaps. Document REACH report definitions, adjustments, lineage, and exports. Add raw landing, run metadata, schema-key snapshots, retries/backfill, and initial alerts. Define SKU/ASIN/UOM ownership. | Critical feeds are replayable; REACH's reporting role is documented; failures and payload changes are visible; no source row is silently discarded. |
+| **Days 31–60: stabilize and reconcile** | Build dbt Silver models with tolerant parsing and versioned rename rules. Add required-field, uniqueness, null-rate, identity, and amount tests. Publish stable Gold marts and reconcile Amazon to QuickBooks and REACH reporting. | Brand/SKU profitability ties to source, ledger, and reporting within approved tolerances; BI reads only Gold. |
+| **Days 61–90: close gaps and operate** | Add advertising-by-ASIN, storage detail, return reasons, and PO/receipt status from the systems that own them. Version governed Sheet inputs. Assign alert owners, write runbooks, test replay, and review service levels. | Fully loaded SKU economics use better drivers; inventory uses actual receipts/status; the team can recover a failed load without engineering heroics. |
 
 ## Drift and quality rules
 
@@ -82,7 +82,7 @@ Each alert includes source, endpoint, run ID, affected field, first-seen time, r
 
 - At least 95% of scheduled feeds arrive and pass source checks.
 - At least 99.5% of net sales resolves to an approved product and brand; the remainder has an owner.
-- Amazon activity reconciles to QuickBooks within an agreed tolerance.
+- Amazon activity reconciles to QuickBooks and REACH financial reporting within agreed tolerances.
 - Monthly channel-P&L preparation time falls by at least 50%.
 - One failed load and one schema-change scenario are successfully replayed in a controlled test.
 

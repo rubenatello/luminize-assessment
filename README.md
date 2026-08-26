@@ -33,12 +33,16 @@ Exact canonical SKU can identify a product; a prefix can suggest only its brand.
 
 `Contribution margin = net product sales after refunds/promotions − referral fees − FBA fulfillment − landed COGS`
 
+**Leadership headline:** Q2 generated $51.2K of SKU-attributable contribution margin, but $50.6K of advertising consumed **98.7%** of it. After storage and subscription, the run-rate result was **($5.6K)** before corporate overhead.
+
 | Q2 result | Amount |
 |---|---:|
 | Net sales after refunds and promotions | **$132,341.93** |
 | SKU-attributable contribution margin | **$51,242.63** |
 | Contribution margin rate | **38.7%** |
-| Result after SKU-less platform costs and adjustments | **($5,483.46)** |
+| Advertising / contribution margin | **98.7%** |
+| Run-rate result after platform costs, excluding adjustment | **($5,572.71)** |
+| Reported result including $89.25 adjustment income | **($5,483.46)** |
 
 ![Contribution margin and platform costs](assets/contribution-margin-and-platform-costs.svg)
 
@@ -60,21 +64,23 @@ Order `114-1003986-4269335`, SKU `PH-BED-MED-GRY`:
 
 Landed cost receipt: ($23,556.00 product + $2,048.80 freight/duty) ÷ 1,300 units = **$19.696 per unit**.
 
+This receipt is intentionally an outlier: the dog bed is the lowest-margin **non-imputed** SKU. Its $12.40 FBA fee is 28.8% of the $42.99 selling price before COGS, supporting a reprice, packaging/dimensional-weight review, or FBM test.
+
 [Settlement rows](processed/settlement_transactions_transformed.csv) · [PO costs](processed/po_unit_costs.csv) · [SKU results](processed/sku_profitability.csv)
 
 ### Data-quality decisions
 
 | Issue found | Resolution used |
 |---|---|
-| Missing PO cost: `GT-LIP-BALM`, `PH-TOY-ROPE-L` | Used flagged brand-median landed cost; validate before posted reporting |
+| Missing PO cost: `GT-LIP-BALM`, `PH-TOY-ROPE-L` | Used flagged brand-median cost; $3,040.90 net sales affected and ±25% cost moves total CM by ±$378 |
 | `PH-DENTAL-30CT` ordered by case | Converted each case to 12 sellable units before unit-cost calculation |
 | `PF-ELECTRO-CITRUS` alias | Mapped through an auditable alias to `PF-ELECTRO-CIT` |
 | ASIN `B0GTRLRJDE` identifies two products | Joined by approved SKU and blocked ASIN-only matching |
-| Advertising, storage, and subscription lack SKU keys | Kept below reported SKU CM; allocated only in the labeled management scenario |
+| Advertising, storage, and subscription lack SKU keys | Kept below reported SKU CM; net-sales allocation is labeled as a threshold check |
 
 [Full quality register](processed/data_quality_register.csv) · [assumptions and limitations](docs/assumptions_and_limitations.md)
 
-### Fully loaded management scenario
+### Net-sales allocation threshold check
 
 SKU-less costs are allocated by net-sales share for direction—not reported SKU profit.
 
@@ -82,9 +88,11 @@ SKU-less costs are allocated by net-sales share for direction—not reported SKU
 
 `Allocated advertising = $50,576.12 × brand net sales share`
 
-FBA fulfillment is not reallocated; refunds already reduce net sales and contribution margin.
+`Net shared-cost load = ($50,576.12 + $6,119.25 + $119.97 − $89.25) ÷ $132,341.93 = 42.9%`
 
-| Brand | Net sales | Reported CM | Allocated advertising | Fully loaded scenario | Scenario margin |
+Every brand receives that same percentage. This is a breakeven threshold check—not cost attribution—and it cannot change the reported CM ranking. FBA fulfillment is already recorded by SKU and is not reallocated.
+
+| Brand | Net sales | Reported CM | Allocated advertising | Threshold result | Threshold margin |
 |---|---:|---:|---:|---:|---:|
 | GlowTheory | $42,872.51 | $20,548.22 | ($16,384.26) | **$2,171.66** | **5.1%** |
 | Peak Fuel | $55,656.70 | $22,027.05 | ($21,269.90) | **($1,829.23)** | **(3.3%)** |
@@ -93,18 +101,24 @@ FBA fulfillment is not reallocated; refunds already reduce net sales and contrib
 
 Brand rows are rounded; unrounded allocations reconcile to $50,576.12.
 
-![Reported contribution margin versus fully loaded scenario](assets/reported-vs-allocated-brand-result.svg)
+![Reported contribution margin versus net-sales allocation threshold](assets/reported-vs-allocated-brand-result.svg)
 
-Fully loaded result also deducts allocated storage and subscription, then adds adjustment income. See the linked brand scenario for every component.
+The threshold result deducts allocated advertising, storage, and subscription, then adds adjustment income. Adjustment income is shown separately from run-rate decisions. Preferred production drivers are advertised-ASIN spend and SKU cubic-foot-days.
 
-| Dog-bed Q2 example | Amount |
-|---|---:|
-| Net sales | $4,776.16 |
-| Reported contribution margin | $291.44 |
-| Net shared-cost allocation | ($2,047.22) |
-| **Fully loaded scenario** | **($1,755.78)** |
+### Advertising guardrail sensitivity
 
-This flags economic risk; it does not claim actual SKU-level advertising. Preferred production drivers are advertised-ASIN spend and SKU cubic-foot-days.
+With current CM, storage, and subscription held constant, Q2 had **$45,003.41** available for advertising before adjustment income.
+
+`Maximum advertising = $51,242.63 CM − $6,119.25 storage − $119.97 subscription − target profit`
+
+| Target post-platform margin | Maximum advertising | Change from Q2 spend |
+|---:|---:|---:|
+| Break-even | $45,003.41 | ($5,572.71) |
+| 1% | $43,679.99 | ($6,896.13) |
+| **5%** | **$38,386.31** | **($12,189.81)** |
+| 8% | $34,416.06 | ($16,160.06) |
+
+A 5% target creates a provisional **$38.4K** quarterly ad cap. Campaign/ASIN contribution data should determine where to reduce or reallocate spend; equivalent price, fee, or COGS improvements can also close the gap.
 
 [Brand scenario](processed/allocated_profitability_scenario_by_brand.csv) · [SKU scenario](processed/allocated_profitability_scenario_by_sku.csv) · [script](analysis/allocate_shared_costs.py)
 
@@ -112,33 +126,43 @@ This flags economic risk; it does not claim actual SKU-level advertising. Prefer
 
 `Refund rate = refunded units ÷ ordered units`
 
-| Brand | Brand rate | Highest-risk SKU | SKU rate | CM effect |
-|---|---:|---|---:|---:|
-| GlowTheory | **4.9%** | `GT-MASK-CLAY` | **10.7%** | $143 reversed; 28.9% of remaining SKU CM |
-| Peak Fuel | **2.8%** | `PF-WHEY-CHOC` | **3.4%** | $328 reversed |
-| PawHaus | **2.7%** | `PH-BED-MED-GRY` | **6.6%** | $138 reversed; 47.2% of remaining SKU CM |
+| Brand | Brand rate | Highest-risk SKU | Refunded / ordered | SKU rate | CM effect |
+|---|---:|---|---:|---:|---:|
+| GlowTheory | **4.9%** | `GT-MASK-CLAY` | 17 / 159 | **10.7%** | $143 reversed; 28.9% of remaining SKU CM |
+| Peak Fuel | **2.8%** | `PF-WHEY-CHOC` | 14 / 411 | **3.4%** | $328 reversed |
+| PawHaus | **2.7%** | `PH-BED-MED-GRY` | 8 / 122 | **6.6%** | $138 reversed; 47.2% of remaining SKU CM |
 
 ![Q2 unit refund rate by brand](assets/refund-rate-by-brand.svg)
 
+These are posted-period rates, not order cohorts: Q2 refunds may relate to Q1 orders, while Q2 orders can refund in Q3. Refund-row CM is an optimistic view of total return economics: the original FBA charge remains in total SKU CM, while return processing and nonrecoverable inventory are unavailable.
+
+### Selected SKU unit economics
+
+| SKU | Order ASP | FBA / order unit | Landed cost / unit | CM / net unit | CM rate |
+|---|---:|---:|---:|---:|---:|
+| `GT-MASK-CLAY` | $14.99 | $3.85 | $4.60 | $3.49 | 23.8% |
+| `PF-WHEY-CHOC` | $44.99 | $6.10 | $14.20 | $16.63 | 38.0% |
+| `PH-BED-MED-GRY` | $42.99 | **$12.40** | $19.70 | **$2.56** | **6.1%** |
+
 **Top recommendations**
 
-1. Replace shared-cost estimates with advertised-ASIN and SKU-storage data or use historical benchmarks by brand to use some form of attribution.
-2. Investigate dog-bed, clay-mask, and chocolate-whey return reasons.
-3. Confirm two imputed costs and act on inventory-cover exceptions.
+1. Set a provisional **$38.4K quarterly ad guardrail** for a 5% post-platform margin; reallocate using campaign/ASIN contribution data.
+2. Reprice, reduce dimensional weight, or test FBM for the dog bed; investigate mask and whey return reasons by cohort.
+3. Validate the two imputed costs and receipt-date costing before product or inventory decisions.
 
 [Refund detail](processed/refund_analysis_by_sku.csv) · [assumptions](docs/assumptions_and_limitations.md) · [quality register](processed/data_quality_register.csv)
 
 ## 3. First 90 days
 
-QuickBooks, REACH, and Sheets are business sources. BigQuery is the warehouse; dbt transforms, tests, and documents models.
+QuickBooks is the accounting ledger; REACH is the financial reporting system; Sheets hold governed manual inputs. BigQuery is the warehouse, and dbt transforms, tests, and documents models.
 
 ![Resilient BigQuery and dbt model flow](assets/resilient-dbt-model-flow.svg)
 
 | Timing | Priority | Outcome |
 |---|---|---|
-| **Days 1–30: protect** | Catalog Amazon, QuickBooks, REACH, and Sheet feeds; profile REACH; retain raw history/run metadata; add freshness, drift, volume, null, retry, and replay controls | Recoverable feeds and visible source changes |
-| **Days 31–60: stabilize** | Build dbt Silver/Core models with `LAX_*` parsing and approved rename aliases; add identity tests, Gold contracts, and QuickBooks reconciliation | Stable profitability reporting with drill-through |
-| **Days 61–90: close gaps** | Add missing advertising, storage, returns, PO/receipt, and inventory data; use REACH where confirmed; assign owners and test replay | Better SKU economics and an operating runbook |
+| **Days 1–30: protect** | Catalog Amazon, QuickBooks, REACH, and Sheet feeds; document REACH report definitions, adjustments, lineage, and exports; retain raw history/run metadata; add drift, null, retry, and replay controls | Recoverable feeds and visible source changes |
+| **Days 31–60: stabilize** | Build dbt Silver/Core models with tolerant parsing and approved rename aliases; add identity tests, Gold contracts, and QuickBooks-to-REACH reconciliation | Stable profitability reporting with drill-through |
+| **Days 61–90: close gaps** | Add advertising-by-ASIN, storage detail, return reasons, and PO/receipt status; govern Sheet inputs; assign owners and test replay | Better SKU economics and an operating runbook |
 
 **Drift rule:** Bronze retains changed payloads. Optional keys warn; missing required fields, null spikes, or failed financial tie-outs hold only affected Gold models. API outages still require retries and replay.
 
@@ -146,8 +170,11 @@ QuickBooks, REACH, and Sheets are business sources. BigQuery is the warehouse; d
 
 ## Key assumptions
 
-- Refund signs reverse sales, promotions, fees, units, and COGS.
-- Shared costs remain below reported SKU CM; allocations are estimated.
+- Refund signs reverse sales, promotions, fees, units, and COGS; FBA is not reversed.
+- Refund rates use posted-period activity, not matched order cohorts.
+- Shared costs remain below reported SKU CM; the net-sales view is a threshold check.
+- Adjustment income is excluded from run-rate ad guardrails.
+- Quarter-wide PO costing can apply late-quarter purchases to earlier sales.
 - `PH-DENTAL-30CT` uses a 12-unit case pack.
 - `GT-LIP-BALM` and `PH-TOY-ROPE-L` use flagged brand-median costs.
 - `PF-ELECTRO-CITRUS` aliases `PF-ELECTRO-CIT`.
@@ -155,23 +182,25 @@ QuickBooks, REACH, and Sheets are business sources. BigQuery is the warehouse; d
 
 ## Reproduce
 
-```powershell
+```bash
 pip install -r requirements.txt
 
-python analysis/profitability_analysis.py `
-  --mapping "<path>/sku_asin_brand_mapping.csv" `
-  --purchase-orders "<path>/purchase_orders_landed_cost.csv" `
-  --inventory "<path>/inventory_snapshot_2026-06-30.csv" `
-  --settlements "<path>/amazon_settlements_apr-jun_2026.csv" `
+python analysis/profitability_analysis.py \
+  --mapping "/path/to/sku_asin_brand_mapping.csv" \
+  --purchase-orders "/path/to/purchase_orders_landed_cost.csv" \
+  --inventory "/path/to/inventory_snapshot_2026-06-30.csv" \
+  --settlements "/path/to/amazon_settlements_apr-jun_2026.csv" \
   --output-dir processed
 
-python analysis/identity_resolution_audit.py `
-  --transactions processed/settlement_transactions_transformed.csv `
+python analysis/identity_resolution_audit.py \
+  --transactions processed/settlement_transactions_transformed.csv \
   --output-dir processed
 
 python analysis/allocate_shared_costs.py
 python analysis/build_repo_charts.py
 ```
+
+Bash/zsh is shown; on PowerShell, run each Python command on one line.
 
 ## AI-use disclosure
 
