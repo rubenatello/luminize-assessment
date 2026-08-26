@@ -60,18 +60,22 @@ SKU-less costs are allocated by net-sales share for direction—not reported SKU
 
 `Allocation share = SKU net sales ÷ $132,341.93`
 
+`Allocated advertising = $50,576.12 × brand net sales share`
+
 FBA fulfillment is not reallocated; refunds already reduce net sales and contribution margin.
 
-| Brand | Net sales | Reported CM | Fully loaded scenario | Scenario margin |
-|---|---:|---:|---:|---:|
-| GlowTheory | $42,872.51 | $20,548.22 | **$2,171.66** | **5.1%** |
-| Peak Fuel | $55,656.70 | $22,027.05 | **($1,829.23)** | **(3.3%)** |
-| PawHaus | $33,812.72 | $8,667.36 | **($5,825.88)** | **(17.2%)** |
-| **Total** | **$132,341.93** | **$51,242.63** | **($5,483.46)** | **(4.1%)** |
+| Brand | Net sales | Reported CM | Allocated advertising | Fully loaded scenario | Scenario margin |
+|---|---:|---:|---:|---:|---:|
+| GlowTheory | $42,872.51 | $20,548.22 | ($16,384.26) | **$2,171.66** | **5.1%** |
+| Peak Fuel | $55,656.70 | $22,027.05 | ($21,269.90) | **($1,829.23)** | **(3.3%)** |
+| PawHaus | $33,812.72 | $8,667.36 | ($12,921.95) | **($5,825.88)** | **(17.2%)** |
+| **Total** | **$132,341.93** | **$51,242.63** | **($50,576.12)** | **($5,483.46)** | **(4.1%)** |
+
+Brand rows are rounded; unrounded allocations reconcile to $50,576.12.
 
 ![Reported contribution margin versus fully loaded scenario](assets/reported-vs-allocated-brand-result.svg)
 
-The scenario allocates $50,576.12 advertising, $6,119.25 storage, and $119.97 subscription, offset by $89.25 adjustment income.
+Fully loaded result also deducts allocated storage and subscription, then adds adjustment income. See the linked brand scenario for every component.
 
 | Dog-bed Q2 example | Amount |
 |---|---:|
