@@ -1,6 +1,6 @@
 # How I would match SKU, ASIN, and brand
 
-The files do not all contain the same identifiers. I would avoid building separate join logic in every report. Instead, I would resolve the source identifier once, store the selected product and brand keys on the fact, and retain the rule that produced the match.
+The files do not all contain the same identifiers which can be difficult. I would avoid building separate join logic in every report. Instead, I would resolve the source identifier once, store the selected product and brand keys on the fact, and retain the rule that produced the match.
 
 ## Matching order
 
