@@ -1,4 +1,5 @@
 # Databricks notebook source
+# This repo can be copied and used in databricks for analysis as needed.
 # MAGIC %md
 # MAGIC # Amazon Q2 2026 profitability demo
 # MAGIC This notebook mirrors the production model: Bronze raw files, Silver typed/resolved facts, and Gold finance marts. Configure the four widget paths, then run all.
