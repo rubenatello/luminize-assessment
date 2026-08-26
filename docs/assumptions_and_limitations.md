@@ -2,14 +2,14 @@
 
 ## Assumptions
 
-- April 1 through June 30, 2026 is treated as the quarter, using settlement posted date.
+- April 1 through June 30, 2026 is treated as the quarter, use settlement posted date.
 - Contribution margin includes only Order and Refund rows with a resolved SKU.
 - Refunds retain the Amazon signs and reverse sales, promotions, referral fees, units, and landed COGS.
 - FBA fees are used as reported. The supplied refund rows do not contain FBA fee reversals.
 - Landed unit cost uses quarter-wide weighted PO cost divided by sellable units. Receipt-date or perpetual moving-average costing would require opening layers and receipt dates that were not supplied.
-- `PH-DENTAL-30CT` PO cases are converted to sellable units at 12 units per case based on the description.
-- `GT-LIP-BALM` and `PH-TOY-ROPE-L` have no PO cost history. Each uses its brand median landed unit cost as a temporary estimate and remains flagged.
-- `PF-ELECTRO-CITRUS` is treated as a proposed alias of `PF-ELECTRO-CIT` based on the supplied product/ASIN mapping.
+- 'PH-DENTAL-30CT' PO cases are converted to sellable units at 12 units per case based on the description.
+- 'GT-LIP-BALM' and 'PH-TOY-ROPE-L' have no PO cost history. Each uses its brand median landed unit cost as a temporary estimate and remains flagged.
+- 'PF-ELECTRO-CITRUS' is treated as a proposed alias of 'PF-ELECTRO-CIT'.
 - Advertising, storage, subscription fees, and adjustments remain below reported SKU-level contribution margin because the settlement rows do not contain a reliable SKU allocation key.
 - A separate management scenario allocates those SKU-less rows by each SKU's share of net sales. It is explicitly estimated, and refund volume is not used as an additional driver because returns already reduce net sales and contribution margin.
 - Inventory days cover uses quarter net units divided by 91 days as its demand rate and fulfillable units as on-hand inventory.
