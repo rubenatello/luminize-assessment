@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Supplied assessment data mapped into the proposed BigQuery model</title>
+  <desc id="desc">Four supplied files land independently in Bronze, are standardized in dbt Silver and Core, and feed governed profitability and inventory marts. Product identity and data-quality controls apply across every path.</desc>
+  <rect width="1200" height="720" fill="#FFFFFF"/>
+  <text x="40" y="44" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#0B2545">Map the supplied files into one governed BigQuery model</text>
+  <text x="40" y="72" font-family="Arial, sans-serif" font-size="15" fill="#667085">One raw landing per source • shared product identity • stable finance marts</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#2E74B5"/>
+    </marker>
+  </defs>
+
+  <g stroke="#2E74B5" stroke-width="3" fill="none" marker-end="url(#arrow)">
+    <path d="M290 180H322"/>
+    <path d="M560 180H592"/>
+    <path d="M930 180H962"/>
+    <path d="M290 285H322"/>
+    <path d="M560 285H592"/>
+    <path d="M930 285H962"/>
+    <path d="M290 390H322"/>
+    <path d="M560 390H592"/>
+    <path d="M930 390H962"/>
+    <path d="M290 495H322"/>
+    <path d="M560 495H592"/>
+    <path d="M930 495H962"/>
+  </g>
+
+  <g font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#0B2545">
+    <text x="40" y="112">SUPPLIED FILE</text>
+    <text x="330" y="112">BRONZE / RAW</text>
+    <text x="600" y="112">DBT SILVER / CORE</text>
+    <text x="970" y="112">REPORTING USE</text>
+  </g>
+
+  <g stroke="#D0D5DD" rx="8">
+    <rect x="40" y="135" width="250" height="90" rx="8" fill="#F6F8FA"/>
+    <rect x="330" y="135" width="230" height="90" rx="8" fill="#EAF2F8" stroke="#2E74B5"/>
+    <rect x="600" y="135" width="330" height="90" rx="8" fill="#EAF2F8" stroke="#2E74B5"/>
+    <rect x="970" y="135" width="190" height="90" rx="8" fill="#E9F6F1" stroke="#0B7A53"/>
+
+    <rect x="40" y="240" width="250" height="90" rx="8" fill="#F6F8FA"/>
+    <rect x="330" y="240" width="230" height="90" rx="8" fill="#EAF2F8" stroke="#2E74B5"/>
+    <rect x="600" y="240" width="330" height="90" rx="8" fill="#EAF2F8" stroke="#2E74B5"/>
+    <rect x="970" y="240" width="190" height="90" rx="8" fill="#E9F6F1" stroke="#0B7A53"/>
+
+    <rect x="40" y="345" width="250" height="90" rx="8" fill="#F6F8FA"/>
+    <rect x="330" y="345" width="230" height="90" rx="8" fill="#EAF2F8" stroke="#2E74B5"/>
+    <rect x="600" y="345" width="330" height="90" rx="8" fill="#EAF2F8" stroke="#2E74B5"/>
+    <rect x="970" y="345" width="190" height="90" rx="8" fill="#E9F6F1" stroke="#0B7A53"/>
+
+    <rect x="40" y="450" width="250" height="90" rx="8" fill="#F6F8FA"/>
+    <rect x="330" y="450" width="230" height="90" rx="8" fill="#EAF2F8" stroke="#2E74B5"/>
+    <rect x="600" y="450" width="330" height="90" rx="8" fill="#EAF2F8" stroke="#2E74B5"/>
+    <rect x="970" y="450" width="190" height="90" rx="8" fill="#E9F6F1" stroke="#0B7A53"/>
+  </g>
+
+  <g font-family="Arial, sans-serif">
+    <g font-size="14" fill="#0B2545" font-weight="700">
+      <text x="55" y="171">SKU / ASIN / brand</text><text x="55" y="193">mapping.csv</text>
+      <text x="345" y="171">raw_product_mapping</text>
+      <text x="615" y="164">stg_product_mapping</text><text x="615" y="187">dim_product • dim_brand</text><text x="615" y="210">bridge_product_identifier</text>
+      <text x="985" y="171">Governed product_key</text><text x="985" y="194">for every fact</text>
+
+      <text x="55" y="276">Amazon settlements</text><text x="55" y="298">Apr–Jun 2026.csv</text>
+      <text x="345" y="276">raw_marketplace_</text><text x="345" y="298">transaction</text>
+      <text x="615" y="269">stg_marketplace_transaction</text><text x="615" y="292">fct_marketplace_transaction</text><text x="615" y="315">Order • refund • shared charge</text>
+      <text x="985" y="276">mart_sku_profitability</text><text x="985" y="299">mart_brand_profitability</text>
+
+      <text x="55" y="381">Purchase orders</text><text x="55" y="403">landed cost.csv</text>
+      <text x="345" y="381">raw_purchase_order_line</text>
+      <text x="615" y="374">stg_purchase_order_line</text><text x="615" y="397">fct_purchase_order_line</text><text x="615" y="420">int_po_landed_unit_cost</text>
+      <text x="985" y="381">Landed COGS feeds</text><text x="985" y="404">profitability marts</text>
+
+      <text x="55" y="486">Inventory snapshot</text><text x="55" y="508">2026-06-30.csv</text>
+      <text x="345" y="486">raw_inventory_snapshot</text>
+      <text x="615" y="479">stg_inventory_snapshot</text><text x="615" y="502">fct_inventory_snapshot</text><text x="615" y="525">SKU + location + disposition</text>
+      <text x="985" y="486">mart_inventory_health</text><text x="985" y="509">as-of reporting</text>
+    </g>
+  </g>
+
+  <rect x="40" y="580" width="550" height="92" rx="9" fill="#FFF8E6" stroke="#B7791F"/>
+  <text x="60" y="612" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#8A5A00">Identity control</text>
+  <text x="60" y="640" font-family="Arial, sans-serif" font-size="14" fill="#475467">Exact SKU → approved alias → unique scoped ASIN</text>
+  <text x="60" y="661" font-family="Arial, sans-serif" font-size="14" fill="#475467">Conflicts retain source evidence and enter the owned exception queue.</text>
+
+  <rect x="610" y="580" width="550" height="92" rx="9" fill="#FFF4F2" stroke="#B42318"/>
+  <text x="630" y="612" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#B42318">Publication control</text>
+  <text x="630" y="640" font-family="Arial, sans-serif" font-size="14" fill="#475467">Freshness • schema • required fields • uniqueness • arithmetic • tie-outs</text>
+  <text x="630" y="661" font-family="Arial, sans-serif" font-size="14" fill="#475467">Warnings publish visibly; material failures hold only affected Gold models.</text>
+
+  <text x="40" y="704" font-family="Arial, sans-serif" font-size="13" fill="#667085">The supplied files remain independently replayable while shared keys and controls create one finance definition.</text>
+</svg>

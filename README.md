@@ -15,6 +15,14 @@ This README is the 20–25 minute presentation. Links provide calculation receip
 
 ![Trusted data foundation](assets/trusted-data-foundation.svg)
 
+### How the supplied files become governed models
+
+Each assessment file has one replayable landing and one controlled path into shared finance models.
+
+![Supplied assessment files mapped to the proposed BigQuery model](assets/supplied-data-to-bigquery-model.svg)
+
+Settlement and PO facts converge in profitability; the inventory snapshot remains an as-of operational fact.
+
 Exact canonical SKU can identify a product; a prefix can suggest only its brand. Conflicts remain visible.
 
 ![Confidence-based identity resolution](assets/identity-confidence-ladder.svg)

@@ -23,6 +23,14 @@ flowchart LR
 
 ![Resilient BigQuery and dbt model flow](../assets/resilient-dbt-model-flow.svg)
 
+## Supplied-data lineage
+
+The four assessment files land independently, then share governed product identity and publication controls.
+
+![Supplied assessment files mapped to the proposed BigQuery model](../assets/supplied-data-to-bigquery-model.svg)
+
+Settlement and PO facts converge in the profitability marts. The inventory snapshot remains a separately grained as-of fact.
+
 REACH is a confirmed source, but its exact entities and system-of-record responsibilities are not specified. Profile its API/exports, keys, history, and ownership before assigning facts to it.
 
 ## Main tables and keys
