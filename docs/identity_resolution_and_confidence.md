@@ -43,14 +43,3 @@ It would also include the canonical product key, match method, approval status, 
 
 The generated [coverage file](../processed/identity_resolution_coverage.csv) and [exception file](../processed/identity_resolution_exceptions.csv) show these results.
 
-## What I would show on a control page
-
-I would keep the summary small enough to review during close:
-
-1. Percentage of rows and net sales matched by exact SKU, alias, ASIN, brand only, or unresolved.
-2. Unresolved or provisional net sales in dollars.
-3. ASIN conflicts and other many-to-many mappings.
-4. Largest aliases by sales and change from the prior period.
-5. First-seen date, owner, and age for open mapping issues.
-
-I would stop publication for a many-to-many product result or a material unresolved balance. I would warn when provisional ASIN matches or prefix-only brand assignments exceed an agreed threshold.
