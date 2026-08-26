@@ -57,7 +57,7 @@ flowchart LR
 | Error | Required key missing/renamed | Continue Bronze; stop affected Silver/Gold |
 | Critical | Financial tie-out or closed period changes materially | Stop publication and escalate |
 
-BigQuery Scheduled Queries can return one row per breached rule. Cloud Monitoring alerts when that row count is greater than zero. Dataform assertions cover model-level tests.
+BigQuery Scheduled Queries can return one row per breached rule. Cloud Monitoring alerts when that row count is greater than zero. dbt source freshness and data tests cover model-level checks.
 
 ## Duplicates and replay
 
@@ -77,6 +77,7 @@ Sheets can hold finance-owned aliases, case packs, and approved overrides, but t
 
 - [BigQuery JSON functions](https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/json_functions)
 - [Scheduled-query alerts](https://docs.cloud.google.com/bigquery/docs/create-alert-scheduled-query)
-- [Dataform assertions](https://docs.cloud.google.com/dataform/docs/assertions)
+- [dbt with BigQuery](https://docs.getdbt.com/guides/bigquery)
+- [dbt source freshness](https://docs.getdbt.com/reference/resource-properties/freshness)
 - [BigQuery table snapshots](https://docs.cloud.google.com/bigquery/docs/table-snapshots-intro)
 - [BigQuery time travel](https://docs.cloud.google.com/bigquery/docs/time-travel)

@@ -2,7 +2,7 @@
 
 ## Starting point
 
-Some Amazon data already reaches BigQuery through third-party APIs and ELT. I would keep that working path, document what it covers, and add a control layer around it. Missing Amazon endpoints, QuickBooks, REACH, and governed Google Sheets would feed the same model.
+Some Amazon data already reaches BigQuery through third-party APIs and ELT, and dbt is the transformation layer. I would keep that path, document its coverage, and add controls around it. Missing Amazon endpoints, QuickBooks, governed Sheets, and the operational system that owns PO/receipt data would feed the same model.
 
 ## Operating design
 
@@ -18,7 +18,7 @@ flowchart LR
 | Layer | Purpose | BigQuery approach |
 |---|---|---|
 | **Bronze** | Preserve source evidence | Append-only `JSON` payload plus source, endpoint, account, report window, extraction time, connector run ID, and payload hash |
-| **Silver** | Normalize without hiding errors | Dataform views/tables using `LAX_INT64`, `LAX_FLOAT64`, and approved rename fallbacks such as `COALESCE(new_field, old_field)` |
+| **Silver** | Normalize without hiding errors | dbt views/tables using `LAX_INT64`, `LAX_FLOAT64`, and approved rename fallbacks such as `COALESCE(new_field, old_field)` |
 | **Gold** | Protect finance and BI | Stable, documented columns; dashboards connect only here |
 | **Controls** | Detect and recover | Run history, JSON-key profiles, null/volume tests, reconciliations, exceptions, retries, and replay |
 
@@ -31,8 +31,8 @@ If the current connector only delivers flattened tables, I would first confirm w
 | Timing | Work | Exit criteria |
 |---|---|---|
 | **Days 1–30: observe and protect** | Inventory endpoints, owners, refresh times, history, and gaps. Add raw JSON landing for critical feeds, run metadata, schema-key snapshots, retries/backfill, and initial freshness/volume alerts. Define SKU/ASIN/UOM ownership. | Critical feeds are replayable; failures and payload changes are visible; no source row is silently discarded. |
-| **Days 31–60: stabilize and reconcile** | Build Silver models with tolerant parsing and versioned rename rules. Add required-field, uniqueness, null-rate, identity, and amount tests. Publish stable Gold marts and reconcile Amazon activity to QuickBooks. | Brand/SKU profitability ties to source and accounting within approved tolerances; BI reads only Gold. |
-| **Days 61–90: close gaps and operate** | Add advertising-by-ASIN, storage detail, return reasons, REACH PO/receipt status, and governed Sheet history. Assign alert owners, write runbooks, test replay, and review service levels. | Fully loaded SKU economics use better drivers; inventory uses actual receipts/status; the team can recover a failed load without engineering heroics. |
+| **Days 31–60: stabilize and reconcile** | Build dbt Silver models with tolerant parsing and versioned rename rules. Add required-field, uniqueness, null-rate, identity, and amount tests. Publish stable Gold marts and reconcile Amazon activity to QuickBooks. | Brand/SKU profitability ties to source and accounting within approved tolerances; BI reads only Gold. |
+| **Days 61–90: close gaps and operate** | Add advertising-by-ASIN, storage detail, return reasons, and PO/receipt status after confirming their source systems. Version governed Sheet inputs. Assign alert owners, write runbooks, test replay, and review service levels. | Fully loaded SKU economics use better drivers; inventory uses actual receipts/status; the team can recover a failed load without engineering heroics. |
 
 ## Drift and quality rules
 
@@ -58,7 +58,7 @@ The fallback is versioned and temporary; a new field is not accepted automatical
 
 ## Low-noise monitoring
 
-BigQuery Scheduled Queries return only breached tests. Cloud Monitoring alerts when the result row count is greater than zero. Dataform assertions cover model-level uniqueness, non-null, relationship, and reconciliation rules.
+BigQuery Scheduled Queries return only breached tests. Cloud Monitoring alerts when the result row count is greater than zero. dbt source freshness and data tests cover model-level freshness, uniqueness, non-null, relationship, and reconciliation rules.
 
 Start with four alerts per critical feed:
 
@@ -84,4 +84,5 @@ I would defer real-time streaming, broad platform replacement, advanced forecast
 - [Work with JSON data](https://docs.cloud.google.com/bigquery/docs/json-data)
 - [JSON functions: `JSON_KEYS` and `LAX_*`](https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/json_functions)
 - [Scheduled-query alerts with Cloud Monitoring](https://docs.cloud.google.com/bigquery/docs/create-alert-scheduled-query)
-- [Dataform assertions](https://docs.cloud.google.com/dataform/docs/assertions)
+- [dbt with BigQuery](https://docs.getdbt.com/guides/bigquery)
+- [dbt source freshness](https://docs.getdbt.com/reference/resource-properties/freshness)

@@ -6,7 +6,7 @@ This README is the 20–25 minute presentation. Linked files are the calculation
 |---|---|---|
 | **1. Data model** | [Written brief](deliverables/Amazon_Q2_2026_Assessment_Brief.docx) | BigQuery layers, keys, identity resolution, schema drift, and ongoing quality controls |
 | **2. Profitability analysis** | [Analysis workbook](deliverables/Amazon_Q2_2026_Profitability_Analysis.xlsx) | Brand/SKU contribution margin, assumptions, exceptions, inventory, and reconciliations |
-| **3. 90-day automation proposal** | [90-day plan](docs/automation_90_day_plan.md) | Ingestion, finance automation, REACH/inventory, ownership, and sequence |
+| **3. 90-day automation proposal** | [90-day plan](docs/automation_90_day_plan.md) | BigQuery/dbt controls, finance automation, inventory, ownership, and sequence |
 | **Presentation** | **This README** | The complete narrative, examples, visuals, findings, and recommendations |
 
 ## 1. Data model: confidence before perfection
@@ -140,8 +140,8 @@ The current third-party ELT remains useful. I would add a BigQuery control layer
 | Timing | Build | Outcome |
 |---|---|---|
 | **Days 1–30: protect ingestion** | Catalog feeds and gaps; land append-only JSON plus run metadata; add retries, replay, schema-key snapshots, freshness, volume, and null-rate alerts | Source changes no longer erase evidence or silently reach reports |
-| **Days 31–60: stabilize finance** | Build Silver views with `LAX_*` parsing and approved `COALESCE(new_name, old_name)` fallbacks; add identity exceptions, Dataform tests, Gold contracts, and Amazon-to-QuickBooks tie-outs | Stable profitability reporting with source drill-through |
-| **Days 61–90: close gaps** | Add missing advertising, storage, return-reason, REACH receipt, and PO-status feeds; assign alert owners and test historical replay | Better SKU economics, inventory actions, and an operating runbook |
+| **Days 31–60: stabilize finance** | Build dbt Silver models with `LAX_*` parsing and approved `COALESCE(new_name, old_name)` fallbacks; add identity exceptions, dbt tests, Gold contracts, and Amazon-to-QuickBooks tie-outs | Stable profitability reporting with source drill-through |
+| **Days 61–90: close gaps** | Add missing advertising, storage, return-reason, PO/receipt, and inventory feeds; confirm their system of record; assign alert owners and test historical replay | Better SKU economics, inventory actions, and an operating runbook |
 
 **Guardrail:** Bronze captures first, but ingestion can still fail from authentication, rate limits, networks, or connector outages. Retries, raw retention, and replay make those failures recoverable. Only Silver/Gold publication is blocked by material quality issues.
 

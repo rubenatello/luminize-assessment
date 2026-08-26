@@ -1,76 +1,63 @@
 # Deliverable 1: proposed BigQuery data model
 
-My goal is to give finance one place to trace a reported number back to the source record and the rule used to transform it. I would use one BigQuery model whether the company chooses native Google Cloud tools or managed connectors.
+The goal is to trace every reported number to the source record and transformation rule. The design extends the company's existing BigQuery and dbt stack.
 
 ## Layers
 
-| Layer | BigQuery datasets | What I would put there |
+| Layer | BigQuery datasets | Contents |
 |---|---|---|
-| **Bronze / raw** | `raw_amazon`, `raw_qb`, `raw_reach`, `raw_sheets` | The source record as received, plus load time, source file/report, row hash, and schema version |
-| **Silver / staging** | `stg_finance` | Renamed and typed fields, normalized identifiers, UOM conversions, and source-specific validation |
-| **Silver / core** | `core_finance` | Shared dimensions, identifier mappings, and transaction-level facts |
-| **Gold / reporting** | `mart_finance`, `mart_operations` | Contribution margin, inventory, reconciliation, and cash reporting |
-| **Controls** | `dq_monitoring`, `quarantine` | Load history, test results, schema changes, unresolved records, and dollar exposure |
+| **Bronze / raw** | `raw_amazon`, `raw_quickbooks`, `raw_operational`, `raw_sheets` | Source payload or file plus load time, endpoint/report, run ID, row hash, and contract version |
+| **Silver / staging** | `stg_finance` | dbt models for typed fields, normalized identifiers, UOM rules, and source validation |
+| **Silver / core** | `core_finance` | Shared dimensions, identifier bridges, and transaction facts |
+| **Gold / reporting** | `mart_finance`, `mart_operations` | Profitability, inventory, reconciliation, and cash reporting |
+| **Controls** | `dq_monitoring`, `quarantine` | Load history, dbt test results, drift events, unresolved records, and dollar exposure |
 
 ```mermaid
 flowchart LR
-    A[Amazon] --> R[Raw source tables]
-    B[QuickBooks] --> R
-    C[REACH] --> R
-    D[Google Sheets] --> R
-    R --> S[Typed staging tables]
-    S --> K[Product and other shared dimensions]
-    S --> F[Transaction-level facts]
-    K --> M[Finance and operations reporting]
-    F --> M
-    S --> Q[Validation and exceptions]
-    F --> Q
+    A["Amazon and QuickBooks"] --> R["Raw BigQuery datasets"]
+    B["Sheets and operational sources"] --> R
+    R --> S["dbt staging and core"]
+    S --> M["Gold marts"]
+    S --> Q["Tests and exceptions"]
 ```
 
-The Bronze/Silver/Gold names are useful shorthand. The more important design choice is that raw evidence, business rules, and reporting outputs are kept separate.
+The source for PO, receipt, and inventory lifecycle data should be confirmed during discovery rather than assumed.
 
 ## Main tables and keys
 
 | Table | Grain | Key or join |
 |---|---|---|
 | `dim_product` | One version of a sellable product | `product_key`; canonical SKU and effective dates |
-| `bridge_product_identifier` | One version of a SKU, alias, ASIN, or UPC mapping | identifier type + value + marketplace + effective dates |
+| `bridge_product_identifier` | One SKU, alias, ASIN, or UPC version | type + value + marketplace + effective dates |
 | `dim_brand` | One brand | `brand_key` |
-| `dim_channel` | One marketplace/channel | `channel_key` |
-| `dim_vendor` | One vendor | `vendor_key` |
 | `fct_marketplace_transaction` | One Amazon settlement row | source report/file + source row key |
 | `fct_purchase_order_line` | One PO line/version | PO number + line + source update |
 | `fct_inventory_snapshot` | SKU + location + disposition + snapshot time | composite source key |
-| `fct_inventory_receipt` | One receipt/shipment line | receipt or shipment line ID |
-| `fct_advertising_spend` | One dated campaign/ad group/SKU cost record | source advertising ID |
+| `fct_inventory_receipt` | One receipt/shipment line | source receipt/shipment line ID |
+| `fct_advertising_spend` | Date + campaign/ad group/advertised product | advertising source ID |
 | `fct_gl_entry` | One QuickBooks transaction line | transaction ID + line ID |
 | `mart_sku_profitability_daily` | Date + SKU + channel | reporting composite key |
 | `mart_inventory_health_daily` | Date + SKU + location | reporting composite key |
 
-I would use generated keys in the facts, but I would retain the source IDs and row hashes. This lets a reviewer move from a dashboard total to the transformed row and then back to the original source.
+Facts retain source IDs, row hashes, and selected business-rule versions for drill-through.
 
-## How I would join the fragmented sources
+## Identity resolution
 
-I would resolve product identity before loading the core facts. The order is exact canonical SKU, approved SKU alias, and then a unique marketplace-scoped ASIN. A SKU prefix can identify a likely brand but cannot create a product key. Any conflict remains unresolved and is reported with its dollar exposure.
+Resolve exact canonical SKU first, then approved alias, then a unique marketplace-scoped ASIN. A prefix can suggest a brand but cannot create a product match. Conflicts remain unresolved with their dollar exposure and owner.
 
-The fact stores the selected `product_key`, `brand_key`, the rule used, and separate confidence results for product, brand, and ASIN. This is covered in [identifier matching and confidence](identity_resolution_and_confidence.md).
+The fact stores `product_key`, `brand_key`, selected rule, and separate confidence results for product, brand, and ASIN. See [identifier matching and confidence](identity_resolution_and_confidence.md).
 
-## Ongoing data checks
+## Checks on every build
 
-I would run the following checks on every load:
-
-1. Compare the observed columns and types with the approved source contract.
-2. Confirm source keys are unique where they should be and log possible duplicates separately.
+1. Confirm source freshness, payload keys/types, row counts, and financial totals.
+2. Test source-key uniqueness and log possible business duplicates separately.
 3. Confirm identifiers resolve to no more than one active product.
-4. Tie settlement components to settlement total and PO extended costs to total landed cost.
-5. Confirm every sold SKU has a product mapping and a cost, or appears in an exception report.
-6. Reconcile reporting totals back to staging and, when available, to QuickBooks.
-7. Show failed rows, dollar exposure, first-seen date, and owner instead of silently dropping them.
+4. Tie settlement components to totals and PO components to landed cost.
+5. Require a product mapping and cost for sold SKUs, or create an exception.
+6. Reconcile Gold totals to Silver and, when available, QuickBooks.
 
-I would stop a reporting refresh for a missing required field, a material reconciliation difference, or an ambiguous product match above the agreed threshold. Smaller issues can publish with a visible warning.
-
-The specific schema-change, snapshot, and replay rules are in [schema changes and recovery](schema_drift_replay_and_validation.md).
+Missing required fields, material reconciliation differences, or ambiguous product matches stop the affected Gold model. Smaller issues publish with a visible warning.
 
 ## Tool choice
 
-My starting recommendation is Cloud Run/Workflows, BigQuery, Dataform, and Connected Sheets or Looker Studio. If the team values faster connector setup more than recurring software cost, managed Amazon and QuickBooks ingestion can feed the same BigQuery model. The two options are compared in [architecture options](architecture_options.md).
+Keep the current third-party ELT for covered sources, BigQuery for storage/compute, and dbt for transformations, tests, lineage, and documentation. Add native GCP jobs only for uncovered endpoints, raw-payload retention, or monitoring gaps. See [architecture options](architecture_options.md).

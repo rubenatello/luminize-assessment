@@ -1,64 +1,55 @@
-# Two ways I would implement the model
+# Implementation around the existing BigQuery and dbt stack
 
-I included two options because the assignment asks what I would automate, but the right tool choice depends on budget and who will maintain the connectors. The BigQuery tables, calculations, and controls stay the same in both options.
+The company already uses third-party ingestion, BigQuery, and dbt. The first decision is not a platform replacement; it is how to close ingestion and control gaps without creating duplicate infrastructure.
 
-## Option A: cost-aware Google Cloud setup
-
-```mermaid
-flowchart LR
-    S[Amazon / QuickBooks / REACH / Sheets] --> I[Cloud Scheduler and Cloud Run]
-    I --> B[Cloud Storage and BigQuery raw tables]
-    B --> D[Dataform transformations and tests]
-    D --> M[BigQuery reporting tables]
-    M --> C[Connected Sheets / Looker Studio]
-    D --> A[Cloud Monitoring alerts]
-```
-
-I would start here if a small team can support a few batch API jobs.
-
-- Lower recurring software cost.
-- Keeps the stack close to BigQuery and Google Sheets.
-- The team owns Amazon API changes, rate limits, backfills, and REACH ingestion.
-- Raw files and run metadata make failed loads replayable.
-
-## Option B: managed connectors
+## Recommended: extend the current stack
 
 ```mermaid
 flowchart LR
-    S[Amazon / QuickBooks / REACH / Sheets] --> E[Managed connectors]
-    E --> B[BigQuery raw history]
-    B --> D[dbt Cloud transformations and tests]
-    D --> M[BigQuery reporting tables]
-    M --> L[Looker / Connected Sheets]
-    D --> O[Managed monitoring]
+    S["Amazon, QuickBooks, Sheets, operational sources"] --> E["Current ELT and APIs"]
+    E --> B["BigQuery Bronze"]
+    B --> D["dbt Silver, Gold, and tests"]
+    D --> M["Finance and BI"]
+    D --> A["Alerts and exceptions"]
 ```
 
-I would choose this when faster implementation and lower connector maintenance are worth the subscription cost.
+- Inventory current endpoints, history, refresh schedules, owners, and raw-payload retention.
+- Keep the connector where coverage and reliability are acceptable.
+- Add dbt source freshness, tests, contracts, lineage, and reconciliation models.
+- Add BigQuery Scheduled Queries and Cloud Monitoring for payload-drift and cross-model alerts.
+- Confirm the source system for PO, receipt, and inventory data during discovery.
 
-- Managed Amazon and QuickBooks ingestion reduces custom connector work.
-- dbt Cloud and a monitoring tool provide scheduling, testing, documentation, and alerts.
-- The tradeoff is higher recurring cost and more vendor dependence.
-- I would still keep raw data in BigQuery and transformation code in version control.
+## Selective custom ingestion
 
-## What stays the same
+Use Cloud Scheduler/Run or another small batch service only where the current connector cannot provide a critical Amazon endpoint, raw history, or reliable backfill.
 
-| Part | Rule in either option |
+```mermaid
+flowchart LR
+    A["Uncovered endpoint"] --> I["Small batch ingestion job"]
+    I --> B["BigQuery Bronze"]
+    B --> D["Existing dbt project"]
+    D --> M["Existing Gold marts"]
+```
+
+This avoids replacing a functioning connector while preserving one transformation and reporting layer.
+
+## Rules in either path
+
+| Part | Rule |
 |---|---|
-| Raw data | Keep the source record, load metadata, row hash, and schema version |
-| Transformations | Type fields, resolve identifiers, apply UOM rules, and preserve source lineage |
-| Reporting | Use the same contribution-margin and inventory definitions |
-| Controls | Test freshness, schema changes, duplicates, mappings, and financial tie-outs |
-| Google Sheets | Treat the Sheet as an input and save scheduled versions to BigQuery |
+| Raw data | Keep source payload/file, load metadata, row hash, and contract version |
+| Transformations | Use dbt to type fields, resolve identifiers, apply UOM rules, and preserve lineage |
+| Reporting | BI connects only to documented Gold models |
+| Controls | Test freshness, payload drift, duplicates, mappings, null rates, and financial tie-outs |
+| Sheets | Treat Sheets as governed inputs and save dated copies to BigQuery |
 
-## My recommendation
+## Recommendation
 
-I would begin with Option A. The current use case is batch-oriented, the business already uses Google Sheets, and BigQuery is the requested reporting foundation. A reasonable middle ground is to buy managed Amazon and QuickBooks ingestion while keeping Dataform and the reporting model in Google Cloud.
+Start with the existing ELT → BigQuery → dbt path. Add custom ingestion only for confirmed gaps, and keep every new model and test inside the existing dbt project. Reassess connector vendors only if missing coverage, failed backfills, or support burden exceeds an agreed service level.
 
-I would revisit the managed option if connector failures consume too much team time or if leadership requires stronger service levels and lineage than the native setup provides.
+## References
 
-## Product references
-
-- [Dataform overview](https://docs.cloud.google.com/dataform/docs/overview)
-- [Connected Sheets](https://docs.cloud.google.com/bigquery/docs/connected-sheets)
-- [Fivetran Amazon Selling Partner setup](https://fivetran.com/docs/connectors/applications/amazon-selling-partner/setup-guide)
-- [Fivetran QuickBooks connector](https://fivetran.com/docs/connectors/applications/quickbooks)
+- [dbt and BigQuery quickstart](https://docs.getdbt.com/guides/bigquery)
+- [dbt source freshness](https://docs.getdbt.com/reference/resource-properties/freshness)
+- [BigQuery JSON data](https://docs.cloud.google.com/bigquery/docs/json-data)
+- [BigQuery scheduled-query alerts](https://docs.cloud.google.com/bigquery/docs/create-alert-scheduled-query)
