@@ -62,6 +62,18 @@ Landed cost receipt: ($23,556.00 product + $2,048.80 freight/duty) ÷ 1,300 unit
 
 [Settlement rows](processed/settlement_transactions_transformed.csv) · [PO costs](processed/po_unit_costs.csv) · [SKU results](processed/sku_profitability.csv)
 
+### Data-quality decisions
+
+| Issue found | Resolution used |
+|---|---|
+| Missing PO cost: `GT-LIP-BALM`, `PH-TOY-ROPE-L` | Used flagged brand-median landed cost; validate before posted reporting |
+| `PH-DENTAL-30CT` ordered by case | Converted each case to 12 sellable units before unit-cost calculation |
+| `PF-ELECTRO-CITRUS` alias | Mapped through an auditable alias to `PF-ELECTRO-CIT` |
+| ASIN `B0GTRLRJDE` identifies two products | Joined by approved SKU and blocked ASIN-only matching |
+| Advertising, storage, and subscription lack SKU keys | Kept below reported SKU CM; allocated only in the labeled management scenario |
+
+[Full quality register](processed/data_quality_register.csv) · [assumptions and limitations](docs/assumptions_and_limitations.md)
+
 ### Fully loaded management scenario
 
 SKU-less costs are allocated by net-sales share for direction—not reported SKU profit.
