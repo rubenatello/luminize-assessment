@@ -1,115 +1,105 @@
-# Amazon Q2 2026 Profitability Assessment
+# Amazon Q2 2026 profitability assessment
 
-A finance-ready assessment of Amazon contribution margin, inventory signals, data quality, and a scalable BigQuery foundation. The repository separates numerical evidence, presentation deliverables, and production-oriented implementation patterns.
+This repository contains my response to the three parts of the assessment: a proposed BigQuery data model, a Q2 Amazon profitability analysis, and a 90-day automation plan.
 
-## Start here: assessment deliverables
+I kept the raw CSV files out of the public repository. The calculation outputs, checks, assumptions, SQL, and Python are included so the work can still be reviewed.
 
-| Deliverable | Use in the review | File |
-|---|---|---|
-| Leadership presentation | 20–25 minute decision narrative | [PPTX](deliverables/Amazon_Q2_2026_Leadership_Presentation.pptx) |
-| Profitability workbook | Brand/SKU drill-down, inventory, checks, and assumptions | [XLSX](deliverables/Amazon_Q2_2026_Profitability_Analysis.xlsx) |
-| Assessment brief | Data model, findings, assumptions, and 90-day plan | [DOCX](deliverables/Amazon_Q2_2026_Assessment_Brief.docx) |
-| Identity-resolution playbook | Join rules, confidence grades, exceptions, and controls | [Markdown](docs/identity_resolution_and_confidence.md) |
-| Schema-drift control | Contract diffs, alerts, snapshots, replay, and dedup audit | [Markdown](docs/schema_drift_replay_and_validation.md) |
-| BigQuery implementation | Staging, dimensions, marts, identity controls, and tests | [SQL folder](sql/bigquery/) |
-| Databricks demonstration | Portable lakehouse implementation example | [Notebook source](databricks/assessment_demo.py) |
+## Start here
 
-The four raw assessment CSV files are intentionally excluded from the public repository. Generated tables in `processed/` preserve the evidence needed to review the calculations without publishing the source extracts.
+| What I would present | File |
+|---|---|
+| Leadership presentation | [PPTX](deliverables/Amazon_Q2_2026_Leadership_Presentation.pptx) |
+| Profitability analysis and supporting schedules | [XLSX](deliverables/Amazon_Q2_2026_Profitability_Analysis.xlsx) |
+| Written assessment | [DOCX](deliverables/Amazon_Q2_2026_Assessment_Brief.docx) |
+| Short explanation of my approach | [Assessment approach](docs/assessment_approach.md) |
 
-## Direct mapping to the assignment
+## How I approached the assignment
 
-| Requested deliverable | Primary submission | Supporting evidence |
-|---|---|---|
-| **1. Data model** | [BigQuery data model](docs/data_model.md) and the diagrams below | [Identity/join controls](docs/identity_resolution_and_confidence.md), [schema-drift controls](docs/schema_drift_replay_and_validation.md), [BigQuery SQL](sql/bigquery/) |
-| **2. Profitability analysis** | [Verified workbook](deliverables/Amazon_Q2_2026_Profitability_Analysis.xlsx) | [Assessment brief](deliverables/Amazon_Q2_2026_Assessment_Brief.docx), generated CSVs, reproducible Python |
-| **3. First-90-day automation proposal** | [One-page proposal](docs/automation_90_day_plan.md) | [Premium vs. cost-aware architectures](docs/architecture_options.md) |
+### 1. Data model
 
-The calculations are evidence for Deliverable 2. The submission narrative is organized around the three requested decisions: how to structure the data, what the economics say, and what to automate first.
+I would land each source in BigQuery without changing the raw record, then build typed staging tables, shared dimensions and facts, and finally the reporting tables used by finance. I used Bronze, Silver, and Gold labels in the diagrams because they make the layers easy to discuss, but the important part is the separation of raw data, transformation logic, and reporting definitions.
 
-## Executive result
+The main join issue is product identity. My proposed order is:
 
-- Net sales after refunds and promotions: **$132.3K**.
-- SKU-attributable CM1: **$51.2K**, or **38.7%**.
-- SKU-less advertising, storage, and subscription charges consume the contribution pool; including those items and adjustments produces an estimated **$5.5K loss after platform overhead**.
-- Two SKUs lack PO cost history. Brand-median landed costs are used, flagged, and isolated from observed costs.
+1. Exact approved SKU.
+2. Approved SKU alias.
+3. ASIN only when it maps to one product in the relevant marketplace and period.
+4. SKU prefix for brand reporting only.
+5. Leave the product unresolved when the evidence conflicts.
 
-## Data flow and identity-control gates
+I score product, brand, and ASIN confidence separately. A missing ASIN should not lower product confidence when the SKU is already an approved match.
 
-```mermaid
-flowchart LR
-    subgraph Sources
-        AMZ[Amazon settlements / inventory]
-        PO[Purchase orders]
-        QB[QuickBooks]
-        REF[Governed product mappings]
-    end
+Supporting files: [data model](docs/data_model.md), [identifier rules](docs/identity_resolution_and_confidence.md), [schema-change controls](docs/schema_drift_replay_and_validation.md), and [BigQuery SQL](sql/bigquery/).
 
-    AMZ --> RAW[Immutable raw layer]
-    PO --> RAW
-    QB --> RAW
-    REF --> RAW
-    RAW --> CONTRACT{Schema contract diff}
-    CONTRACT -- Optional additions: warn --> STG[Typed and normalized staging]
-    CONTRACT -- Required/type change: block --> OWNER[Owned remediation workflow]
-    STG --> SKU{Exact canonical SKU?}
-    SKU -- Yes: A / 100 --> RES[Resolve product_key + brand_key]
-    SKU -- No --> ALIAS{Approved SKU alias?}
-    ALIAS -- Yes: A / 95 --> RES
-    ALIAS -- No --> ASIN{Unique scoped ASIN?}
-    ASIN -- Yes: B / 85 --> REVIEW[Resolve provisionally + review queue]
-    ASIN -- No --> BRAND{Reliable brand evidence?}
-    BRAND -- Prefix/source only: C / 60 --> BRANDONLY[Brand only; product unresolved]
-    BRAND -- Missing or conflict --> QUAR[Quarantine exception]
-    REVIEW --> RES
-    RES --> CORE[Conformed dimensions and facts]
-    BRANDONLY --> DQ[Identity quality mart]
-    QUAR --> DQ
-    CORE --> MART[Profitability and inventory marts]
-    CORE --> DQ
-    DQ --> GATE{Finance publication gate}
-    GATE -- Pass --> BI[Leadership reporting]
-    GATE -- Fail --> OWNER
+### 2. Profitability analysis
+
+I calculated contribution margin as product sales net of refunds, less promotions, referral fees, FBA fees, and landed COGS.
+
+| Q2 result | Amount |
+|---|---:|
+| Net sales after refunds and promotions | **$132,341.93** |
+| SKU-attributable contribution margin | **$51,242.63** |
+| Contribution margin rate | **38.7%** |
+| Result after SKU-less platform costs and adjustments | **($5,483.46)** |
+
+The last line is shown separately because advertising, storage, subscription fees, and adjustments do not have a reliable SKU allocation key in the supplied settlement file. I did not force those costs across products.
+
+![Contribution margin and platform costs](assets/contribution-margin-and-platform-costs.svg)
+
+![Contribution margin by brand](assets/brand-contribution-margin.svg)
+
+Two SKUs did not have PO cost history. I used each brand's median landed unit cost as a temporary estimate and flagged every affected row. The workbook shows the brand and SKU results, assumptions, data-quality issues, inventory view, and reconciliation checks.
+
+### 3. First 90 days
+
+I would start with the lower-cost Google Cloud option unless the team wants to pay for managed connectors immediately.
+
+- **Days 1–30:** automate source delivery, preserve raw history, add schema-change alerts, establish product and UOM mappings, and reconcile the source totals.
+- **Days 31–60:** automate the Amazon management P&L and the Amazon-to-QuickBooks reconciliation.
+- **Days 61–90:** add REACH PO/receipt activity, inventory exceptions, SKU-level advertising, and a short-term cash and inventory outlook.
+
+I included both a [cost-aware and managed option](docs/architecture_options.md) because the model should not depend on which connector vendor is selected.
+
+## Important data observations
+
+- The settlement file has SKU but no ASIN. SKU is therefore the primary transaction join.
+- The actual Peak Fuel prefix is `PF`, not `PK`.
+- `PF-ELECTRO-CITRUS` resolves to `PF-ELECTRO-CIT` through an approved alias based on the mapping data.
+- ASIN `B0GTRLRJDE` is assigned to two different SKUs. I did not use that ASIN as a join key.
+- The PO file supports landed-cost calculations, but it does not establish whether inventory is open, shipped, received, or inbound to Amazon.
+- The inventory file is a 6/30 snapshot. I use it for days-cover and exception analysis, not as a transaction history.
+
+## Schema changes and duplicate handling
+
+Amazon can change an API or report without the finance team being ready for it. The proposed load records the observed columns and a schema hash on every run, compares them with an approved contract, and writes any differences to a drift log.
+
+- A new optional field creates a warning and is retained in raw data.
+- A missing or renamed required field, duplicate column, or type change stops the reporting-table refresh.
+- Raw data is not deduplicated away.
+- A replay of the same source report is handled by a source-record key.
+- Rows with the same business values but different source keys remain in the data and are flagged for review.
+
+The example contract and audit can be run locally:
+
+```powershell
+python analysis/schema_contract_audit.py `
+  "<path>/amazon_settlements_apr-jun_2026.csv" `
+  contracts/amazon_settlements.schema.json
 ```
 
-Important principle: a missing ASIN does **not** reduce product confidence when an approved SKU resolves the row. Product, brand, and ASIN confidence are stored separately so one weak attribute cannot contaminate a strong join.
-
-## Join contract
-
-| Priority | Rule | Result | Product confidence | Permitted use |
-|---:|---|---|---:|---|
-| 1 | Exact normalized SKU in the approved, effective-dated bridge | Canonical product + brand | A / 100 | Finance marts |
-| 2 | Exact approved SKU alias | Canonical product + brand | A / 95 | Finance marts; monitor alias volume |
-| 3 | ASIN unique within marketplace/account/date scope | Provisional product + brand | B / 85 | Publish only under materiality threshold and review SLA |
-| 4 | Approved source brand or SKU-prefix rule | Brand only | C / 60 | Aggregate exception reporting only |
-| 5 | Missing or conflicting identifiers | Unresolved | F / 0 | Quarantine; never force-join |
-
-Fuzzy text similarity may suggest candidates to a steward, but it never auto-posts a finance foreign key.
-
-## Current identity-confidence snapshot
-
-| Dimension / method | Grade | Rows | % rows | Net sales | % sales | Decision |
-|---|---:|---:|---:|---:|---:|---|
-| Product: exact canonical SKU | A / 100 | 4,552 | 98.87% | $130,989.56 | 98.98% | Publish |
-| Product: approved SKU alias | A / 95 | 52 | 1.13% | $1,352.37 | 1.02% | Publish; monitor |
-| Brand: approved product mapping | A / 100 | 4,604 | 100.00% | $132,341.93 | 100.00% | Publish |
-| ASIN: unique, enriched from resolved SKU | B / 90 | 4,384 | 95.22% | $129,173.74 | 97.61% | Publish as attribute |
-| ASIN: conflicting mapping | F / 0 | 220 | 4.78% | $3,168.19 | 2.39% | Block ASIN-only joins |
-
-The conflicting ASIN is `B0GTRLRJDE`, assigned to both `GT-ROLLER-JADE` and `PH-BRUSH-DBL`. SKU remains authoritative for these transactions. See the generated [coverage report](processed/identity_resolution_coverage.csv) and [exception report](processed/identity_resolution_exceptions.csv).
-
-## Repository map
+## Repository guide
 
 ```text
-analysis/        Reproducible profitability and identity-audit scripts
-contracts/       Versioned source-schema contracts used by drift gates
-databricks/      Databricks notebook source showing the lakehouse implementation
-deliverables/    Verified workbook, written brief, and leadership presentation
-docs/            Data model, identity playbook, automation plan, assumptions, AI use
-processed/       Generated analysis tables, coverage metrics, and exception registers
-sql/bigquery/    Staging, dimensions, marts, identity controls, and quality tests
+analysis/        Python used for the calculations and audits
+contracts/       Expected source schemas
+databricks/      Optional Databricks demonstration
+deliverables/    Workbook, written response, and presentation
+docs/            Design notes, assumptions, and automation plan
+processed/       Generated analysis outputs and exception reports
+sql/bigquery/    Proposed BigQuery tables, transformations, and tests
 ```
 
-## Run locally
+## Reproduce the analysis
 
 ```powershell
 python analysis/profitability_analysis.py `
@@ -123,20 +113,11 @@ python analysis/identity_resolution_audit.py `
   --transactions processed/settlement_transactions_transformed.csv `
   --output-dir processed
 
-python analysis/schema_contract_audit.py `
-  "<path>/amazon_settlements_apr-jun_2026.csv" `
-  contracts/amazon_settlements.schema.json
+python analysis/build_repo_charts.py
 ```
 
-Dependencies: Python 3.11+, pandas, and NumPy.
+Python 3.11+, pandas, and NumPy are required.
 
-## Platform recommendation
+## AI use
 
-For a finance team already using Google Sheets, **BigQuery + dbt/Dataform + Looker Studio/Connected Sheets** is the lower-friction production choice. Databricks remains a credible option if the company already operates a lakehouse or expects material streaming, ML, or multi-channel engineering requirements. The interview story should lead with reconciled economics and controlled decisions; the platform is the implementation vehicle.
-
-Two implementation paths are provided:
-
-- **Efficient / cost-aware — recommended starting point:** native Google Cloud serverless ingestion, BigQuery, Dataform, and Connected Sheets/Looker Studio. Lowest recurring software footprint; more ownership of API connectors.
-- **Premium / managed:** managed Amazon and QuickBooks ingestion, BigQuery, dbt Cloud, managed observability, and Looker. Faster connector deployment and stronger enterprise operations; materially higher subscription cost.
-
-Both paths use the same Bronze → Silver → Gold contracts, so the company can begin cost-aware and replace ingestion/orchestration components without redesigning the finance model.
+I used AI to help profile the files, draft portions of the Python/SQL, and format the deliverables. I reviewed the logic, reconciled the outputs to the supplied files, and documented the assumptions and exceptions. More detail is in [assumptions and AI use](docs/assumptions_and_ai_use.md).

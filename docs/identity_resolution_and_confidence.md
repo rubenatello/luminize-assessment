@@ -1,98 +1,56 @@
-# Identity resolution and confidence framework
+# How I would match SKU, ASIN, and brand
 
-## Objective
+The files do not all contain the same identifiers. I would avoid building separate join logic in every report. Instead, I would resolve the source identifier once, store the selected product and brand keys on the fact, and retain the rule that produced the match.
 
-Every financial fact should carry stable foreign keys plus enough metadata to explain exactly how those keys were assigned. The system should maximize deterministic matches, preserve uncertainty, and prevent ambiguous identifiers from silently entering finance marts.
+## Matching order
 
-The key design choice is to score **product**, **brand**, and **ASIN attribute** confidence separately. A transaction can have a high-confidence product because its SKU is approved even when the source omits ASIN. Conversely, a recognizable brand prefix does not establish a product key.
+| Priority | Evidence | What I would assign | Confidence | Use in reporting |
+|---:|---|---|---:|---|
+| 1 | Exact approved SKU | Product and brand | A / 100 | Use normally |
+| 2 | Approved SKU alias | Product and brand | A / 95 | Use and monitor alias volume |
+| 3 | ASIN maps to one active product in the marketplace and period | Provisional product and brand | B / 85 | Use only within an agreed threshold and review |
+| 4 | Approved brand field or SKU prefix | Brand only | C / 60 | Brand-level exception reporting only |
+| 5 | Missing or conflicting identifiers | No forced match | F / 0 | Hold in the exception table |
 
-## Keys and join scope
+I would not use fuzzy text matching to post a product key. It could suggest a possible match for review, but someone should approve the mapping before it affects finance reporting.
 
-Facts store surrogate keys for stable history and efficient joins:
+## Why I separate the scores
 
-| Key | Target | Rule |
-|---|---|---|
-| `product_key` | `dim_product` | Assigned only by an approved deterministic rule or an explicitly monitored provisional ASIN rule |
-| `brand_key` | `dim_brand` | Normally inherited from the resolved product; may be populated alone for brand-level exception reporting |
-| `channel_key` | `dim_channel` | Source system + marketplace/account |
-| `date_key` | `dim_date` | Transaction, snapshot, PO, or receipt date according to fact grain |
-| `source_row_key` | raw/staging lineage | File/object ID + row hash; never discarded |
+Product, brand, and ASIN are related but not the same question.
 
-Identifiers are stored in `bridge_product_identifier` at this grain:
+- If an exact SKU is approved but ASIN is missing, the product match can still be A-grade.
+- If a prefix says `GT`, `PF`, or `PH`, I may know the likely brand without knowing the exact product.
+- If one ASIN is attached to two SKUs, I can still use a valid source SKU while refusing to use the ASIN as a join.
 
-`identifier_type + normalized_identifier + marketplace/account scope + valid_from + valid_to`
+I would therefore store `product_match_method`, `product_confidence`, `brand_confidence`, and `asin_status` separately.
 
-The bridge also stores `resolution_method`, `rule_id`, `is_approved`, `resolution_status`, confidence scores, steward, approval timestamp, and source lineage. Effective dates prevent a corrected alias or reassigned identifier from rewriting history.
+## Identifier mapping table
 
-## Resolution precedence
+I would keep a versioned `bridge_product_identifier` with this grain:
 
-1. **Exact canonical SKU — A/100.** Normalize case and whitespace only; do not remove meaningful punctuation unless the rule is versioned and tested.
-2. **Approved SKU alias — A/95.** Exact match to a steward-approved alias with effective dates. Alias volume is monitored because growth can indicate upstream master-data drift.
-3. **Unique scoped ASIN — B/85.** Use only when ASIN maps to one active product inside marketplace/account/date scope. Mark provisional and send to review if used for a finance fact.
-4. **Brand evidence — C/60 or lower.** An approved source-brand normalization may identify brand; a SKU-prefix rule is weaker. Both can populate `brand_key` for exception reporting but cannot invent `product_key`.
-5. **Conflict or missing evidence — F/0.** Preserve the row in quarantine with amount exposure, candidate matches, owner, and SLA.
+`identifier type + normalized value + marketplace/account + valid-from date + valid-to date`
 
-Fuzzy product-name similarity and generative suggestions may rank candidates for a steward. They are never automatic finance joins.
+It would also include the canonical product key, match method, approval status, reviewer, approval date, source, and rule version. The effective dates matter because correcting a mapping today should not silently rewrite a closed historical period.
 
-## Attribute-specific confidence grades
+## What I found in this assessment
 
-### Product confidence
+- All 4,604 order/refund rows have a SKU and resolve to a product and brand.
+- 4,552 rows use the canonical SKU.
+- 52 rows use the approved alias `PF-ELECTRO-CITRUS → PF-ELECTRO-CIT`.
+- The settlement file has no ASIN, so any ASIN shown later is an attribute added from the product mapping, not source evidence from the settlement row.
+- ASIN `B0GTRLRJDE` is attached to both `GT-ROLLER-JADE` and `PH-BRUSH-DBL`. It affects 220 rows and $3,168.19 of net sales. The SKU still resolves those transactions, but the ASIN should not be used by itself.
+- The Peak Fuel prefix in the files is `PF`, not `PK`.
 
-| Grade | Score | Evidence | Treatment |
-|---|---:|---|---|
-| A | 95–100 | Exact approved SKU or alias | Publish to finance marts |
-| B | 80–94 | Unique scoped ASIN with no contradictory SKU | Provisional; publish only below threshold and review |
-| C | 50–79 | Partial identifiers or human-unapproved rule | Exception reporting only |
-| F | 0–49 | Missing, ambiguous, or contradictory | Quarantine |
+The generated [coverage file](../processed/identity_resolution_coverage.csv) and [exception file](../processed/identity_resolution_exceptions.csv) show these results.
 
-### Brand confidence
+## What I would show on a control page
 
-| Grade | Score | Evidence | Treatment |
-|---|---:|---|---|
-| A | 100 | Brand inherited from approved product mapping | Publish |
-| B | 85–95 | Normalized source brand consistent with product/ASIN | Publish with control |
-| C | 60 | Versioned SKU-prefix inference, such as `GT`, `PF`, or `PH` | Brand-only reporting; review |
-| D | 30 | Text inference or fuzzy candidate | Steward queue only |
-| F | 0 | Missing or conflicting brand evidence | Quarantine |
+I would keep the summary small enough to review during close:
 
-### ASIN attribute confidence
+1. Percentage of rows and net sales matched by exact SKU, alias, ASIN, brand only, or unresolved.
+2. Unresolved or provisional net sales in dollars.
+3. ASIN conflicts and other many-to-many mappings.
+4. Largest aliases by sales and change from the prior period.
+5. First-seen date, owner, and age for open mapping issues.
 
-| Grade | Score | Evidence | Treatment |
-|---|---:|---|---|
-| A | 100 | Source ASIN agrees with a unique approved SKU/product mapping | Publish and may be used as corroboration |
-| B | 90 | ASIN is enriched from a resolved SKU and is unique in scope | Publish as an attribute, not source evidence |
-| C | 70 | Source ASIN is unique but crosswalk approval is pending | Review queue |
-| F | 0 | ASIN missing, duplicated, or contradictory | Do not use for joins |
-
-Missing ASIN is not itself a failed product match. Store `asin_confidence_score = 0` or `asin_status = 'NOT_AVAILABLE'` while retaining the independently supported product score.
-
-## Current assessment application
-
-- All 4,604 order/refund rows contain a SKU and resolve to a product and brand.
-- 4,552 rows resolve by exact canonical SKU; 52 resolve through approved alias `PF-ELECTRO-CITRUS -> PF-ELECTRO-CIT`.
-- The settlement file supplies no ASIN. ASIN is therefore an enriched attribute, not source evidence.
-- ASIN `B0GTRLRJDE` is assigned to both `GT-ROLLER-JADE` and `PH-BRUSH-DBL`. It affects 220 rows and $3,168.19 of net sales. Those facts remain correctly resolved by SKU, but the ASIN is graded F/0 and blocked from ASIN-only joins.
-- The actual Peak Fuel SKU prefix is `PF`, not `PK`. Prefix rules must be reference data, not code assumptions.
-
-## At-a-glance identity control panel
-
-The production dashboard should show both row coverage and financial exposure:
-
-1. Product resolution A/B/C/F distribution by row count and net sales.
-2. Brand resolution A/B/C/F distribution by row count and net sales.
-3. ASIN status: source-confirmed, enriched-unique, missing, or conflicting.
-4. Unresolved and provisional net sales against the finance materiality threshold.
-5. Top aliases by volume and quarter-over-quarter change.
-6. Identifier collisions, first-seen date, age, owner, and SLA status.
-7. Mapping freshness and percentage of facts resolved by each bridge version.
-
-Recommended publication gates:
-
-- **Block:** any unresolved/conflicted product identity above the agreed materiality threshold; any ASIN-only join using a conflicted ASIN; any many-to-many bridge result.
-- **Warn:** provisional product matches exceed 0.5% of net sales; alias usage grows materially; brand-prefix inference is non-zero.
-- **Pass:** at least 99.5% of net sales has A-grade product and brand resolution, with the remainder owned and immaterial.
-
-## Exception workflow
-
-Each exception record includes source row, raw identifiers, candidates, confidence by attribute, financial exposure, first/last seen, owner, status, decision, reviewer, and effective date. Approved resolutions create a new version in the identifier bridge; rejected candidates remain auditable. The pipeline reruns affected facts rather than editing published tables manually.
-
+I would stop publication for a many-to-many product result or a material unresolved balance. I would warn when provisional ASIN matches or prefix-only brand assignments exceed an agreed threshold.

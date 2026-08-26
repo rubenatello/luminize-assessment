@@ -1573,7 +1573,7 @@
       "signed_amount": -37706.86172053872
     },
     {
-      "line_item": "Contribution margin (CM1)",
+      "line_item": "Contribution margin",
       "signed_amount": 51242.62827946128
     },
     {
@@ -1593,7 +1593,7 @@
       "signed_amount": 89.25
     },
     {
-      "line_item": "Profit after platform overhead",
+      "line_item": "Result after platform costs",
       "signed_amount": -5483.461720538726
     }
   ],
@@ -1603,7 +1603,7 @@
       "issue": "Two sellable SKUs have no PO landed-cost history",
       "evidence": "GT-LIP-BALM, PH-TOY-ROPE-L; 2 SKUs",
       "resolution": "Imputed each SKU at its brand median landed unit cost and flagged every affected row.",
-      "ongoing_control": "Quarantine cost-missing SKUs; require finance approval before publishing final CM."
+      "ongoing_control": "Quarantine cost-missing SKUs; require finance approval before publishing final profitability reporting."
     },
     {
       "severity": "High",
@@ -1630,7 +1630,7 @@
       "severity": "Medium",
       "issue": "Platform fees and adjustments have no usable SKU allocation key",
       "evidence": "9 settlement rows lack SKU, including advertising, storage, and subscription fees.",
-      "resolution": "Kept these amounts below SKU-attributable CM1; did not force an allocation.",
+      "resolution": "Kept these amounts below SKU-attributable contribution margin; did not force an allocation.",
       "ongoing_control": "Ingest advertising campaign/product reports and storage SKU detail before allocation."
     },
     {

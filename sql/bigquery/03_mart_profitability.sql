@@ -1,4 +1,4 @@
--- CM1 keeps only SKU-attributable Order and Refund economics.
+-- Contribution margin keeps only SKU-attributable Order and Refund economics.
 -- Missing costs are imputed at brand median and remain explicitly flagged.
 
 CREATE OR REPLACE TABLE `your_project.finance.mart_sku_profitability_q2_2026` AS
@@ -69,4 +69,3 @@ SELECT
   COUNTIF(cost_imputed) AS imputed_skus
 FROM `your_project.finance.mart_sku_profitability_q2_2026`
 GROUP BY brand;
-

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="560" viewBox="0 0 1080 560" role="img" aria-labelledby="title desc">
+<title id="title">Contribution margin and platform costs</title>
+<desc id="desc">Contribution margin was positive 51.2 thousand dollars. Advertising, storage, subscription, and adjustments resulted in a 5.5 thousand dollar loss after platform costs.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<text x="40" y="50" font-family="Arial, sans-serif" fill="#0B2545" font-size="24" font-weight="700">Contribution margin is positive; platform costs make the quarter negative</text>
+<text x="40" y="80" font-family="Arial, sans-serif" fill="#667085" font-size="15">Platform costs cannot be reliably assigned to SKU from the supplied file</text>
+<line x1="90" y1="301.0" x2="1010" y2="301.0" stroke="#E4E7EC" stroke-width="2"/>
+<rect x="123.7" y="147.4" width="86" height="153.6" rx="3" fill="#0B7A53"/>
+<text x="166.66666666666669" y="137.4" font-family="Arial, sans-serif" fill="#0B2545" font-size="14" font-weight="700" text-anchor="middle">$51.2K</text>
+<text x="166.66666666666669" y="536" font-family="Arial, sans-serif" fill="#0B2545" font-size="13" text-anchor="middle">Contribution</text>
+<rect x="277.0" y="301.0" width="86" height="151.6" rx="3" fill="#B42318"/>
+<text x="320.0" y="474.6021385482625" font-family="Arial, sans-serif" fill="#0B2545" font-size="14" font-weight="700" text-anchor="middle">($50.6K)</text>
+<text x="320.0" y="536" font-family="Arial, sans-serif" fill="#0B2545" font-size="13" text-anchor="middle">Ad spend</text>
+<rect x="430.3" y="301.0" width="86" height="18.3" rx="3" fill="#B42318"/>
+<text x="473.33333333333337" y="341.34247835364704" font-family="Arial, sans-serif" fill="#0B2545" font-size="14" font-weight="700" text-anchor="middle">($6.1K)</text>
+<text x="473.33333333333337" y="536" font-family="Arial, sans-serif" fill="#0B2545" font-size="13" text-anchor="middle">Storage</text>
+<rect x="583.7" y="301.0" width="86" height="2.0" rx="3" fill="#B42318"/>
+<text x="626.6666666666666" y="325.0" font-family="Arial, sans-serif" fill="#0B2545" font-size="14" font-weight="700" text-anchor="middle">($0.1K)</text>
+<text x="626.6666666666666" y="536" font-family="Arial, sans-serif" fill="#0B2545" font-size="13" text-anchor="middle">Subscription</text>
+<rect x="737.0" y="299.0" width="86" height="2.0" rx="3" fill="#0B7A53"/>
+<text x="780.0" y="289.0" font-family="Arial, sans-serif" fill="#0B2545" font-size="14" font-weight="700" text-anchor="middle">$0.1K</text>
+<text x="780.0" y="536" font-family="Arial, sans-serif" fill="#0B2545" font-size="13" text-anchor="middle">Adjustments</text>
+<rect x="890.3" y="301.0" width="86" height="16.4" rx="3" fill="#B42318"/>
+<text x="933.3333333333334" y="339.4367002348382" font-family="Arial, sans-serif" fill="#0B2545" font-size="14" font-weight="700" text-anchor="middle">($5.5K)</text>
+<text x="933.3333333333334" y="536" font-family="Arial, sans-serif" fill="#0B2545" font-size="13" text-anchor="middle">Final result</text>
+</svg>

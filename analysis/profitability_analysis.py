@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Reproducible Q2 2026 Amazon profitability and inventory analysis.
 
-The script intentionally keeps SKU-attributable contribution margin (CM1)
-separate from platform overhead that lacks a SKU key. It also produces a
+The script intentionally keeps SKU-attributable contribution margin
+separate from platform costs that lack a SKU key. It also produces a
 data-quality register so that assumptions are visible rather than buried.
 """
 
@@ -290,7 +290,7 @@ def data_quality_register(
             "issue": "Two sellable SKUs have no PO landed-cost history",
             "evidence": f"{', '.join(missing_cost_skus)}; {len(missing_cost_skus)} SKUs",
             "resolution": "Imputed each SKU at its brand median landed unit cost and flagged every affected row.",
-            "ongoing_control": "Quarantine cost-missing SKUs; require finance approval before publishing final CM.",
+            "ongoing_control": "Quarantine cost-missing SKUs; require finance approval before publishing final profitability reporting.",
         },
         {
             "severity": "High",
@@ -317,7 +317,7 @@ def data_quality_register(
             "severity": "Medium",
             "issue": "Platform fees and adjustments have no usable SKU allocation key",
             "evidence": f"{missing_sku_rows} settlement rows lack SKU, including advertising, storage, and subscription fees.",
-            "resolution": "Kept these amounts below SKU-attributable CM1; did not force an allocation.",
+            "resolution": "Kept these amounts below SKU-attributable contribution margin; did not force an allocation.",
             "ongoing_control": "Ingest advertising campaign/product reports and storage SKU detail before allocation.",
         },
         {
@@ -381,7 +381,7 @@ def main() -> None:
             overhead["classification"] == "below_cm_platform_overhead", "signed_amount"
         ].sum()
     )
-    profit_after_overhead = cm + adjustment_income - platform_overhead
+    result_after_platform_costs = cm + adjustment_income - platform_overhead
     imputed_sales = float(tx.loc[tx["cost_imputed"], "gross_sales"].sum())
     imputed_units = float(tx.loc[tx["cost_imputed"], "quantity"].sum())
 
@@ -393,12 +393,12 @@ def main() -> None:
             ("Referral fees", -float(brand["referral_fees"].sum())),
             ("FBA fulfillment fees", -float(brand["fba_fees"].sum())),
             ("Landed COGS", -float(brand["landed_cogs"].sum())),
-            ("Contribution margin (CM1)", cm),
+            ("Contribution margin", cm),
             ("Advertising cost", float(overhead.loc[overhead["transaction_type"] == "Advertising Cost", "signed_amount"].sum())),
             ("FBA storage fee", float(overhead.loc[overhead["transaction_type"] == "FBA Storage Fee", "signed_amount"].sum())),
             ("Subscription fee", float(overhead.loc[overhead["transaction_type"] == "Subscription Fee", "signed_amount"].sum())),
             ("Adjustments / other income", adjustment_income),
-            ("Profit after platform overhead", profit_after_overhead),
+            ("Result after platform costs", result_after_platform_costs),
         ],
         columns=["line_item", "signed_amount"],
     )
@@ -411,7 +411,7 @@ def main() -> None:
         "contribution_margin_pct": round(cm / net_sales, 6),
         "platform_overhead": round(platform_overhead, 2),
         "adjustment_income": round(adjustment_income, 2),
-        "profit_after_platform_overhead": round(profit_after_overhead, 2),
+        "profit_after_platform_overhead": round(result_after_platform_costs, 2),
         "imputed_cost_sales": round(imputed_sales, 2),
         "imputed_cost_sales_pct": round(imputed_sales / float(brand["gross_sales"].sum()), 6),
         "imputed_cost_units": round(imputed_units, 2),

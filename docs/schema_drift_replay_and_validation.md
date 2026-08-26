@@ -1,103 +1,100 @@
-# Schema drift, validation, deduplication, and replay controls
+# Handling schema changes, duplicates, and historical recovery
 
-## Control objective
+Amazon can add, remove, or rename API/report fields without the finance team being ready for it. I would treat the expected source schema as a versioned contract and compare every new load with that contract before refreshing the reporting tables.
 
-An upstream API or report change should create an auditable event before it becomes a finance-reporting surprise. Every ingestion run records the source schema, data fingerprint, row counts, and validation results. Bronze accepts and preserves evidence; Silver and Gold publish only through explicit contracts.
+## What I would record on every run
 
-## Ingestion sequence
+- Source system and endpoint/report.
+- API or report version, when available.
+- Extraction time and requested date window.
+- Observed field names, types, nullability, and column order.
+- A hash of the observed schema.
+- Source row count, loaded row count, and amount totals.
+- Raw payload/file hash and code version.
+- Final run status and any validation errors.
 
-~~~mermaid
+The example implementation is in [the BigQuery control SQL](../sql/bigquery/07_schema_drift_and_replay.sql). The repository also contains an [Amazon settlement contract](../contracts/amazon_settlements.schema.json) and a [Python header audit](../analysis/schema_contract_audit.py).
+
+## How the alert would work
+
+```mermaid
 flowchart LR
-    A[Amazon API / report<br/>QuickBooks / REACH / Sheet] --> B[Land immutable payload<br/>with run + source metadata]
-    B --> C[Extract field paths<br/>names, types, nullability]
-    C --> D[Compare with<br/>last approved contract]
-    D --> E{Drift severity}
-    E -- Added optional field --> W[Warn: preserve in Bronze<br/>exclude from curated model]
-    E -- Removed/renamed/type change --> F[Fail Silver publish<br/>quarantine + alert owner]
-    E -- No material change --> V[Validate rows, keys,<br/>amounts, and freshness]
-    V --> L[Idempotent Bronze load]
-    L --> S[Deterministic Silver merge]
-    S --> G[Gold finance marts]
+    A[Receive API response or file] --> B[Save the raw payload]
+    B --> C[Read the observed schema]
+    C --> D[Compare with approved contract]
+    D -->|No material change| V[Run row and amount checks]
+    D -->|New optional fields| W[Warn and retain in raw data]
+    D -->|Missing, renamed, or changed required field| F[Stop reporting refresh and alert]
     W --> V
-    F --> R[Contract review<br/>mapping/version update]
-    R --> V
-~~~
+    V --> P[Load reporting tables]
+```
 
-## Schema registry and automated diff
+I would classify the differences this way:
 
-Maintain these control tables:
-
-| Table | Grain | Key fields |
+| Result | Example | Action |
 |---|---|---|
-| schema_contract | One approved field version | source, endpoint/report, field path, expected type, required flag, accepted aliases, effective dates, owner |
-| schema_snapshot_header | One source schema per run | run ID, source, endpoint/report, API/report version, extraction time, schema hash |
-| schema_snapshot_field | One observed field per snapshot | snapshot ID, field path, type, mode/nullability, ordinal position |
-| schema_drift_event | One detected difference | added/removed/type/mode/order, prior/current values, severity, owner, status, first seen |
-| pipeline_run | One ingestion attempt | start/end, source object/report ID, status, row count, payload hash, schema hash, code version |
+| Information | Column order changed, but parsing uses column names | Record it and continue |
+| Warning | Three optional fields were added | Keep them in raw data, notify the owner, and do not expose them in reporting until reviewed |
+| Error | Required field removed or renamed; type or nested mode changed; duplicate column name | Save the raw payload but stop the Silver/Gold refresh |
+| Critical | The change causes a financial tie-out difference or changes a closed period | Stop publication and escalate to finance/data owners |
 
-Recommended severity:
-
-- **INFO:** column order changed but name-based parsing is unaffected.
-- **WARN:** new optional field. Preserve it in Bronze and notify the owner; do not automatically expose it in Silver/Gold.
-- **ERROR:** required field removed, renamed without an approved alias, type or repeated/nested mode changed, duplicate column names, or key semantics changed. Block the curated publish.
-- **CRITICAL:** the change creates a financial reconciliation delta, drops identifier coverage below threshold, or changes historical values for a previously closed period.
+A column rename normally appears as one expected column missing and one new column added. If the missing column is required, the load stops until the contract or source mapping is updated.
 
 Example alert:
 
-> Amazon settlement schema drift: 3 new fields detected (tax_collection_model, marketplace_facilitator_tax, promotion_type); 1 required field missing (sku). Bronze payload preserved. Silver/Gold publication blocked. Run 2026-08-25T07:00Z; owner: marketplace_data.
+> Amazon settlements: 3 new fields detected and required field `sku` is missing. The raw response was saved, but the reporting refresh was stopped. Review pipeline run 2026-08-25T07:00Z.
 
-## Validation and deduplication policy
+## Tables used for the audit trail
 
-Bronze is append-only evidence and is **never deduplicated**. It records:
+| Table | One row represents |
+|---|---|
+| `pipeline_run` | One attempt to load a source |
+| `schema_contract` | One approved field and contract version |
+| `schema_snapshot_header` | One observed source schema for a run |
+| `schema_snapshot_field` | One field in the observed schema |
+| `schema_drift_event` | One added, removed, renamed, type, mode, or order difference |
+| `dedup_audit` | The duplicate/replay result for one model run |
 
-- pipeline run ID, API endpoint/report ID and version;
-- source object URI or request window/page token;
-- extraction timestamp and source modified timestamp;
-- source row number or array index;
-- raw payload hash and canonical row hash;
-- schema hash and ingestion code commit.
+## Duplicate handling
 
-The pipeline is idempotent at ingestion: rerunning the same source object/report does not create another Bronze copy unless the payload changed. Use a source record key such as report ID + source row number, or endpoint/account/window/page/index when the API supplies no event ID.
+I would not run `SELECT DISTINCT` over finance data and assume the problem is solved.
 
-Silver does not use SELECT DISTINCT. It applies a documented rule:
+- Raw/Bronze keeps the source evidence. It is not deduplicated based on business values.
+- Loading the same report twice should be idempotent. I would use the source report ID plus row number, or the API event ID when one is available.
+- If the same source record is replayed unchanged, the reporting layer keeps one current version and records the replay in `dedup_audit`.
+- If two rows have identical amounts and identifiers but different source record keys, I would keep both and flag them as possible business duplicates. They may represent two real transactions.
+- The audit records rows received, rows published, replayed rows, possible business duplicates, affected dollars, and the rule version.
 
-1. If the source supplies a stable transaction/event ID, keep the latest version by source update timestamp.
-2. If the same source report/file is replayed, merge on source record key and retain one loaded record.
-3. If two rows have identical business content but different source record keys, preserve both and flag them as potential duplicates. They may be legitimate transactions.
-4. Record raw rows, merged rows, replay duplicates, possible business duplicates, affected amounts, rule version, and selected survivor in the dedup audit.
+The same load would also test required values, accepted transaction types, unique source keys, date coverage, row counts, amount totals, product mapping, and reconciliation back to the source.
 
-Every finance fact also has uniqueness, accepted-value, nullability, date-window, row-count, amount-tie-out, and cross-source reconciliation tests.
+## Data and schema snapshots
 
-## Snapshot and recovery strategy
+I would save the original API response or file in a date-partitioned Cloud Storage path and keep a manifest linking it to the pipeline run. Schema snapshots and drift events are small, so I would retain their history rather than overwrite it.
 
-- Preserve each raw API response/file in a date-partitioned immutable object path and keep the manifest according to finance retention policy.
-- Store every schema snapshot and drift event; schema history is small and should not be overwritten.
-- Use BigQuery time travel for short-window operational recovery.
-- Create scheduled BigQuery table snapshots for close-critical Silver/Gold tables when history must outlive the time-travel window.
-- Record the mapping/contract version on every published run so a historical period can be reproduced with the rules then in force.
-- At month-end, persist row counts, amount totals, key coverage, schema hashes, code commit, and source manifests as a close evidence package.
+For recovery:
 
-## Google Sheets ingestion
+- Use BigQuery time travel for a recent accidental change.
+- Create scheduled table snapshots for close-critical reporting tables that need a longer recovery window.
+- Save the source manifest, schema hash, mapping version, row counts, financial totals, and code commit as part of the month-end close evidence.
 
-Google Sheets is useful for finance-owned reference data, but a live mutable Sheet should not be the system of record.
+This makes it possible to explain why a historical report changed and, when necessary, rerun it using the source and mapping versions that were active at the time.
 
-**Efficient path**
+## Google Sheets
 
-1. Create a BigQuery external table over the governed Sheet for simple access.
-2. On a schedule, snapshot the Sheet range into a dated Bronze BigQuery table, or export through the Sheets API to immutable Cloud Storage first.
-3. Store Sheet ID, tab/range, modified time, editor when available, schema hash, row hashes, and pipeline run ID.
-4. Validate required headers, duplicates, effective dates, and referential integrity before merging to the identifier/UOM mapping tables.
+I would use Google Sheets for finance-maintained reference data such as SKU aliases, case packs, or approved overrides, but I would not treat the live Sheet as historical evidence.
 
-**Premium path**
+For the lower-cost GCP option:
 
-Use a managed Sheets connector, but still land versioned Bronze snapshots and run the same contract/diff gates. Managed ingestion is not a substitute for history or governance.
+1. Use a BigQuery external table when finance needs direct access to the governed Sheet.
+2. On a schedule, copy the Sheet range into a dated raw BigQuery table, or export it to Cloud Storage first.
+3. Save the Sheet ID, tab/range, modified time, schema hash, row hashes, and pipeline run ID.
+4. Check required headers, duplicate keys, effective dates, and product relationships before merging approved changes.
 
-For high-risk changes such as SKU aliases, case packs, landed-cost overrides, or brand mappings, require approval fields and effective dates. Do not let a formula edit silently rewrite closed history.
+A managed connector can replace the extraction step, but I would still keep the dated copy and run the same checks. Otherwise a formula or mapping edit could change closed history without leaving a useful audit trail.
 
-## Implementation references
+## Google Cloud references
 
 - [BigQuery INFORMATION_SCHEMA.COLUMNS](https://docs.cloud.google.com/bigquery/docs/information-schema-columns)
 - [BigQuery table snapshots](https://docs.cloud.google.com/bigquery/docs/table-snapshots-intro)
 - [BigQuery time travel](https://docs.cloud.google.com/bigquery/docs/time-travel)
 - [BigQuery external tables over Google Drive and Sheets](https://docs.cloud.google.com/bigquery/docs/external-data-drive)
-

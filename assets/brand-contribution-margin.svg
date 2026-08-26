@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="500" viewBox="0 0 980 500" role="img" aria-labelledby="title desc">
+<title id="title">Q2 contribution margin by brand</title>
+<desc id="desc">Peak Fuel contributed 22.0 thousand dollars, GlowTheory 20.5 thousand, and PawHaus 8.7 thousand.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<text x="40" y="52" font-family="Arial, sans-serif" fill="#0B2545" font-size="26" font-weight="700">Q2 contribution margin by brand</text>
+<text x="40" y="80" font-family="Arial, sans-serif" fill="#667085" font-size="15">Contribution margin and margin rate</text>
+<text x="162" y="153" font-family="Arial, sans-serif" fill="#0B2545" font-size="17" text-anchor="end">PawHaus</text>
+<rect x="180" y="110" width="271.5" height="72" rx="3" fill="#2E74B5"/>
+<text x="196" y="154" font-family="Arial, sans-serif" fill="white" font-size="15" font-weight="700">25.6% margin</text>
+<text x="465.5059883105684" y="154" font-family="Arial, sans-serif" fill="#0B2545" font-size="17" font-weight="700">$8.7K</text>
+<text x="162" y="255" font-family="Arial, sans-serif" fill="#0B2545" font-size="17" text-anchor="end">GlowTheory</text>
+<rect x="180" y="212" width="643.7" height="72" rx="3" fill="#2E74B5"/>
+<text x="196" y="256" font-family="Arial, sans-serif" fill="white" font-size="15" font-weight="700">47.9% margin</text>
+<text x="837.6753819803032" y="256" font-family="Arial, sans-serif" fill="#0B2545" font-size="17" font-weight="700">$20.5K</text>
+<text x="162" y="357" font-family="Arial, sans-serif" fill="#0B2545" font-size="17" text-anchor="end">Peak Fuel</text>
+<rect x="180" y="314" width="690.0" height="72" rx="3" fill="#2E74B5"/>
+<text x="196" y="358" font-family="Arial, sans-serif" fill="white" font-size="15" font-weight="700">39.6% margin</text>
+<text x="884.0" y="358" font-family="Arial, sans-serif" fill="#0B2545" font-size="17" font-weight="700">$22.0K</text>
+</svg>

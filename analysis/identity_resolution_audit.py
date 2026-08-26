@@ -91,8 +91,8 @@ def main() -> None:
                 "affected_brands": "|".join(sorted(rows["brand"].unique())),
                 "rows": len(rows),
                 "net_sales": round(float(rows["net_sales"].sum()), 2),
-                "resolution": "Use approved SKU; block ASIN-only join until steward correction",
-                "owner": "product_data_steward",
+                "resolution": "Use approved SKU; block ASIN-only join until the product data owner corrects the mapping",
+                "owner": "product_data_owner",
                 "status": "open",
             }
         )
@@ -106,7 +106,7 @@ def main() -> None:
                 "rows": len(rows),
                 "net_sales": round(float(rows["net_sales"].sum()), 2),
                 "resolution": "Effective-dated approved alias; monitor usage trend",
-                "owner": "product_data_steward",
+                "owner": "product_data_owner",
                 "status": "approved_monitor",
             }
         )
@@ -123,4 +123,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

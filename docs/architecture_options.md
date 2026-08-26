@@ -1,67 +1,64 @@
-# Premium and cost-aware architecture options
+# Two ways I would implement the model
 
-Both options implement the same business model and data contracts. The difference is how much connector, orchestration, observability, and semantic-layer work the company buys versus owns.
+I included two options because the assignment asks what I would automate, but the right tool choice depends on budget and who will maintain the connectors. The BigQuery tables, calculations, and controls stay the same in both options.
 
-## Option A — efficient / cost-aware BigQuery architecture
+## Option A: cost-aware Google Cloud setup
 
-~~~mermaid
+```mermaid
 flowchart LR
-    S[Amazon SP-API<br/>QuickBooks API<br/>REACH API/export<br/>Google Sheets] --> I[Cloud Scheduler + Cloud Run]
-    I --> B[GCS + BigQuery Bronze<br/>immutable raw]
-    B --> DF[Dataform]
-    DF --> SV[BigQuery Silver<br/>staging + identity + core facts]
-    SV --> T[Assertions + reconciliation gates]
-    T --> G[BigQuery Gold<br/>finance marts]
-    G --> CS[Connected Sheets]
-    G --> LS[Looker Studio]
-    T --> A[Cloud Monitoring<br/>email/Slack exceptions]
-~~~
+    S[Amazon / QuickBooks / REACH / Sheets] --> I[Cloud Scheduler and Cloud Run]
+    I --> B[Cloud Storage and BigQuery raw tables]
+    B --> D[Dataform transformations and tests]
+    D --> M[BigQuery reporting tables]
+    M --> C[Connected Sheets / Looker Studio]
+    D --> A[Cloud Monitoring alerts]
+```
 
-**Best fit:** small finance/data team, moderate volumes, Google-centric workflow, strong cost sensitivity.
+I would start here if a small team can support a few batch API jobs.
 
-**Strengths:** serverless, small recurring software footprint, native Git/Dataform lineage and assertions, familiar Sheets consumption.
+- Lower recurring software cost.
+- Keeps the stack close to BigQuery and Google Sheets.
+- The team owns Amazon API changes, rate limits, backfills, and REACH ingestion.
+- Raw files and run metadata make failed loads replayable.
 
-**Risks:** the team owns API changes, backfills, rate limits, and custom REACH ingestion. Mitigate with shared connector contracts, replayable raw objects, and monitoring.
+## Option B: managed connectors
 
-## Option B — premium / managed medallion architecture
-
-~~~mermaid
+```mermaid
 flowchart LR
-    S[Amazon Selling Partner<br/>QuickBooks<br/>REACH<br/>Google Sheets] --> ELT[Managed ELT connectors<br/>+ custom REACH connector]
-    ELT --> B[BigQuery Bronze<br/>source replicas + history]
-    B --> DBT[dbt Cloud jobs + CI]
-    DBT --> SV[BigQuery Silver<br/>conformed dimensions + facts]
-    SV --> OBS[Managed observability<br/>+ dbt tests]
-    OBS --> G[BigQuery Gold<br/>finance marts + semantic models]
-    G --> L[Looker]
-    G --> CS[Connected Sheets]
-    OBS --> INC[Owned incidents + SLAs]
-~~~
+    S[Amazon / QuickBooks / REACH / Sheets] --> E[Managed connectors]
+    E --> B[BigQuery raw history]
+    B --> D[dbt Cloud transformations and tests]
+    D --> M[BigQuery reporting tables]
+    M --> L[Looker / Connected Sheets]
+    D --> O[Managed monitoring]
+```
 
-**Best fit:** leadership prioritizes speed, service levels, lineage, and low connector maintenance over software cost.
+I would choose this when faster implementation and lower connector maintenance are worth the subscription cost.
 
-**Strengths:** managed connectors for Amazon and QuickBooks, faster backfills, stronger CI/lineage/observability, enterprise semantic governance.
+- Managed Amazon and QuickBooks ingestion reduces custom connector work.
+- dbt Cloud and a monitoring tool provide scheduling, testing, documentation, and alerts.
+- The tradeoff is higher recurring cost and more vendor dependence.
+- I would still keep raw data in BigQuery and transformation code in version control.
 
-**Risks:** higher recurring vendor spend and lock-in. Control this by keeping raw data in BigQuery, transformations in version control, and business definitions independent of the ingestion vendor.
+## What stays the same
 
-## Common medallion contracts
+| Part | Rule in either option |
+|---|---|
+| Raw data | Keep the source record, load metadata, row hash, and schema version |
+| Transformations | Type fields, resolve identifiers, apply UOM rules, and preserve source lineage |
+| Reporting | Use the same contribution-margin and inventory definitions |
+| Controls | Test freshness, schema changes, duplicates, mappings, and financial tie-outs |
+| Google Sheets | Treat the Sheet as an input and save scheduled versions to BigQuery |
 
-| Layer | Contract | Examples |
-|---|---|---|
-| **Bronze / raw** | Immutable source evidence with load time, source object, row hash, schema version, and replay support | Amazon settlement rows, QuickBooks journal lines, REACH PO events, Sheet mapping snapshots |
-| **Silver / core** | Typed, deduplicated, effective-dated, identity-resolved dimensions and atomic facts | dim_product, dim_brand, identifier bridge, marketplace transactions, PO lines, receipts, inventory snapshots |
-| **Gold / reporting** | Reconciled finance and operating metrics with certified definitions | SKU/brand contribution margin, settlement-to-GL reconciliation, inventory health, 13-week cash outlook |
-| **Control plane** | Freshness, completeness, uniqueness, financial tie-outs, identity coverage, ownership, and publication gates | Unresolved revenue, ASIN collisions, missing landed cost, late source, GL delta |
+## My recommendation
 
-Both paths use the same [schema-drift, validation, deduplication, and replay controls](schema_drift_replay_and_validation.md). Google Sheets remains a governed input: query it as an external table when useful, but snapshot each scheduled version to Bronze so live edits cannot rewrite closed history.
+I would begin with Option A. The current use case is batch-oriented, the business already uses Google Sheets, and BigQuery is the requested reporting foundation. A reasonable middle ground is to buy managed Amazon and QuickBooks ingestion while keeping Dataform and the reporting model in Google Cloud.
 
-## Selection recommendation
+I would revisit the managed option if connector failures consume too much team time or if leadership requires stronger service levels and lineage than the native setup provides.
 
-Start with Option A when the core team can support a small number of APIs and daily/batch latency is acceptable. Choose Option B immediately if connector reliability, auditability, and implementation speed are worth a materially higher subscription commitment. A sensible hybrid is managed Amazon/QuickBooks ingestion with native BigQuery + Dataform transformations.
+## Product references
 
-## Current implementation references
-
-- [Google Cloud Dataform overview](https://docs.cloud.google.com/dataform/docs/overview): Git-based BigQuery transformations, dependency management, assertions, documentation, and scheduling.
-- [Google Cloud Connected Sheets](https://docs.cloud.google.com/bigquery/docs/connected-sheets): governed BigQuery analysis through the familiar Sheets interface.
-- [Fivetran Amazon Selling Partner setup](https://fivetran.com/docs/connectors/applications/amazon-selling-partner/setup-guide): managed Amazon SP-API ingestion.
-- [Fivetran QuickBooks connector](https://fivetran.com/docs/connectors/applications/quickbooks): managed QuickBooks ingestion.
+- [Dataform overview](https://docs.cloud.google.com/dataform/docs/overview)
+- [Connected Sheets](https://docs.cloud.google.com/bigquery/docs/connected-sheets)
+- [Fivetran Amazon Selling Partner setup](https://fivetran.com/docs/connectors/applications/amazon-selling-partner/setup-guide)
+- [Fivetran QuickBooks connector](https://fivetran.com/docs/connectors/applications/quickbooks)

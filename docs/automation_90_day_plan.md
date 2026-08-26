@@ -1,36 +1,34 @@
-# Deliverable 3 — first 90 days of finance automation
+# Deliverable 3: what I would automate in the first 90 days
 
-## Recommendation
+My recommendation is to start with the cost-aware BigQuery option and solve the source-control problems before adding more reporting. If leadership already has budget for managed Amazon and QuickBooks connectors, those can be substituted without changing the finance model.
 
-Begin with the **efficient / cost-aware BigQuery path** unless leadership already has budget and operating support for managed ELT. Preserve the same Bronze → Silver → Gold contracts so ingestion can later move to the premium path without rebuilding dimensions, facts, tests, or reporting.
+## Proposed order
 
-| Period | Automate first | Why this order | Tangible output |
+| Timing | What I would do | Why I would do it then | Expected result |
 |---|---|---|---|
-| **Days 1–30: control the sources** | Inventory QuickBooks, REACH, Amazon, and Sheets feeds; schedule immutable raw loads; snapshot/diff schemas; establish product/SKU/ASIN/UOM bridges; add freshness, uniqueness, dedup, and reconciliation tests | Automation without source contracts scales errors. Identity and amount controls are prerequisites for a trusted P&L | Daily ingestion/control dashboard, drift alerts/publication gates, replayable history, owned exception queue |
-| **Days 31–60: automate the management P&L** | Build settlement, landed-cost, inventory, advertising, and GL facts; publish brand/SKU CM; reconcile Amazon settlement activity to QuickBooks clearing accounts; replace copy/paste Sheets with governed outputs | This removes the highest-value recurring close work and makes profitability repeatable | Close-ready channel P&L, source drill-through, Amazon-to-QuickBooks reconciliation |
-| **Days 61–90: turn history into action** | Add REACH PO lifecycle and receipts; inventory cover/aging/stockout alerts; campaign-to-SKU advertising; 13-week cash/inventory outlook; owner-based alerts and close SLAs | Inventory and forecast automation require reliable demand, cost, receipts, and accounting first | Inventory/action dashboard, replenishment exceptions, cash outlook |
+| **Days 1–30** | Document the Amazon, QuickBooks, REACH, and Google Sheets feeds; schedule raw loads; save source and schema history; add product/SKU/ASIN/UOM mappings; test dates, totals, required columns, and duplicate behavior | A faster report is not useful if a source change or bad mapping can alter it without warning | Repeatable loads, schema-change alerts, source-to-target documentation, and an exception list |
+| **Days 31–60** | Build the settlement, landed-cost, inventory, advertising, and GL facts; calculate contribution margin by brand and SKU; reconcile Amazon activity to QuickBooks; replace copy-and-paste reporting | This addresses the recurring close work and gives finance one repeatable channel P&L | Brand/SKU profitability, source drill-through, and Amazon-to-QuickBooks reconciliation |
+| **Days 61–90** | Add REACH PO lifecycle and receipts, inventory cover and aging alerts, campaign/SKU advertising data, and a 13-week cash and inventory outlook | Inventory and forecast outputs are more useful after demand, receipts, cost, and accounting history are reliable | Inventory exceptions, replenishment actions, advertising decisions, and a short-term cash view |
 
-## Two delivery paths
+## Cost-aware versus managed
 
-| Component | Efficient / cost-aware | Premium / managed |
+| Component | Cost-aware starting point | Managed alternative |
 |---|---|---|
-| Ingestion | Scheduled Cloud Run jobs using Amazon SP-API, QuickBooks API, REACH API/SFTP/export, and governed Sheets inputs | Managed ELT for Amazon and QuickBooks; managed file/API connector or custom connector for REACH |
-| Orchestration | Cloud Scheduler + Workflows; Dataform schedules | Managed connector scheduling + dbt Cloud jobs; Composer only for complex dependencies |
-| Bronze | GCS immutable objects + append-only BigQuery raw tables | Managed source replicas in BigQuery with history/metadata |
-| Silver | Dataform: typed staging, deduplication, identity bridge, core dimensions/facts, assertions | dbt Cloud: tested staging/core models, documentation, lineage, CI |
-| Gold | BigQuery finance marts | BigQuery finance marts + governed semantic layer |
-| Consumption | Connected Sheets and Looker Studio | Looker plus Connected Sheets |
-| Monitoring | Dataform assertions, control tables, Cloud Logging/Monitoring | Managed observability plus dbt tests and source freshness |
-| Tradeoff | Lower recurring software cost; higher connector maintenance | Faster implementation and lower maintenance; higher subscription and vendor dependence |
+| Ingestion | Cloud Scheduler/Run jobs for the APIs and file exports | Managed Amazon and QuickBooks connectors; managed or custom REACH connector |
+| Transformations | Dataform in BigQuery | dbt Cloud |
+| Raw history | Cloud Storage plus append-only BigQuery tables | Connector-managed source history in BigQuery |
+| Reporting | Connected Sheets and Looker Studio | Looker and Connected Sheets |
+| Monitoring | BigQuery control tables, Dataform assertions, and Cloud Monitoring | Managed data observability plus dbt tests |
+| Main tradeoff | Lower cost, more connector ownership | Faster setup and less maintenance, higher recurring cost |
 
-## Day-90 success measures
+## How I would measure progress
 
-- At least 95% of scheduled feeds arrive and pass source controls.
-- 99.5%+ of net sales has A-grade product and brand identity; all remaining exposure has an owner and SLA.
-- Amazon activity reconciles to QuickBooks within an approved tolerance.
-- Monthly channel P&L preparation time falls by at least 50%.
-- Inventory exceptions use actual receipt/lifecycle data rather than treating open POs as inbound.
+By day 90, I would expect:
 
-## Why not automate everything at once
+- At least 95% of scheduled feeds to arrive and pass source checks.
+- At least 99.5% of net sales to resolve to an approved product and brand, with the remainder visible and assigned for review.
+- Amazon activity to reconcile to QuickBooks within an agreed tolerance.
+- Monthly channel-P&L preparation time to fall by at least 50%.
+- Inventory reporting to use actual PO status and receipt data rather than assuming every open PO is inbound.
 
-The first 90 days should deliver a controlled close and actionable exceptions, not a large platform program. Advanced forecasting, enterprise MDM, real-time streaming, and broad self-service BI remain backlog items until source reliability and finance ownership are demonstrated.
+I would not make real-time streaming, a large master-data program, or advanced forecasting part of the first 90 days. Those can be revisited after the daily loads and month-end reconciliation are dependable.
