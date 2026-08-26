@@ -122,7 +122,7 @@ This flags economic risk; it does not claim actual SKU-level advertising. Prefer
 
 **Top recommendations**
 
-1. Replace shared-cost estimates with advertised-ASIN and SKU-storage data.
+1. Replace shared-cost estimates with advertised-ASIN and SKU-storage data or use historical benchmarks by brand to use some form of attribution.
 2. Investigate dog-bed, clay-mask, and chocolate-whey return reasons.
 3. Confirm two imputed costs and act on inventory-cover exceptions.
 
