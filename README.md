@@ -1,6 +1,6 @@
 # Amazon Q2 2026 profitability assessment
 
-This README is the presentation: a 20–25 minute leadership walkthrough of the requested data model, profitability analysis, and 90-day automation plan. Linked files provide the supporting detail and calculation receipts.
+This README is the 20–25 minute presentation. Linked files are the calculation receipts.
 
 | Requested deliverable | Primary file | What it covers |
 |---|---|---|
@@ -11,11 +11,11 @@ This README is the presentation: a 20–25 minute leadership walkthrough of the 
 
 ## 1. Data model: confidence before perfection
 
-The model preserves every source record before applying business rules. Reporting tables receive only records that pass structural, financial, and identity checks.
+Keep source evidence, business rules, and reporting outputs separate. Publish only records that pass structural, financial, and identity checks.
 
 ![Trusted data foundation](assets/trusted-data-foundation.svg)
 
-Product identity is resolved once and carried into the facts. An exact SKU can establish product confidence even when ASIN is missing; a brand prefix can support brand reporting without forcing a product; a conflict remains visible in an exception queue.
+Resolve identity once: exact SKU can identify a product, a prefix can suggest only the brand, and conflicts stay in an exception queue.
 
 ![Confidence-based identity resolution](assets/identity-confidence-ladder.svg)
 
@@ -40,7 +40,7 @@ Contribution margin is net product sales after refunds and promotions, less refe
 
 ### One transaction, traced from sale to contribution margin
 
-Order `114-1003986-4269335` for `PH-BED-MED-GRY` shows how a profitable sale can become economically fragile before any shared advertising or storage allocation.
+Order `114-1003986-4269335` for `PH-BED-MED-GRY` shows the calculation.
 
 | Step | Source field | Amount |
 |---|---|---:|
@@ -52,21 +52,19 @@ Order `114-1003986-4269335` for `PH-BED-MED-GRY` shows how a profitable sale can
 | Landed COGS | PO weighted landed unit cost | **($19.70)** |
 | **Contribution margin** | Calculated | **$0.79** |
 
-The landed cost is supported by three PO lines totaling 1,300 units: $23,556.00 product cost plus $2,048.80 freight/duty equals $25,604.80, or **$19.696 per sellable unit**.
-
-This transaction remains positive after attributable costs, but only **$0.79** of additional shared cost would erase its margin. The supplied advertising and storage rows have no SKU key, so the analysis does not claim that those costs belong to this order. At quarter level, the SKU generated **$291.44** of contribution margin; any defensible allocation above that amount would make the SKU negative.
+Three PO lines support the landed cost: $23,556.00 product cost plus $2,048.80 freight/duty over 1,300 units equals **$19.696 per unit**. The sale earns only **$0.79** before shared costs; the SKU earns **$291.44** for the quarter.
 
 Receipts: [transformed settlement rows](processed/settlement_transactions_transformed.csv) · [PO landed-cost summary](processed/po_unit_costs.csv) · [SKU profitability](processed/sku_profitability.csv)
 
 ### Management allocation scenario: directional, not reported profit
 
-Yes, a blanket allocation is useful for management color if it is shown beside—not instead of—the auditable SKU contribution margin. This scenario distributes SKU-less advertising, FBA storage, subscription cost, and adjustment income by each SKU's share of Q2 net sales.
+For management color, allocate SKU-less costs by each SKU's share of Q2 net sales and show the estimate beside reported contribution margin.
 
 `SKU allocation share = SKU net sales / $132,341.93`
 
 `Fully loaded scenario = reported contribution margin - allocated advertising - allocated storage - allocated subscription + allocated adjustment`
 
-FBA **fulfillment** fees are not allocated again: the settlement already assigns those fees to SKU and they are included in reported contribution margin. Refund volume is also not a separate allocation driver because refunds already reduce net sales and contribution margin; using it again would double-penalize return-heavy products.
+Do not allocate FBA **fulfillment** again; it is already assigned to SKU. Do not add a refund weight; refunds already reduce net sales and contribution margin.
 
 | Brand | Net sales | Reported contribution margin | Fully loaded scenario | Scenario margin |
 |---|---:|---:|---:|---:|
@@ -77,7 +75,7 @@ FBA **fulfillment** fees are not allocated again: the settlement already assigns
 
 ![Reported contribution margin versus fully loaded scenario by brand](assets/reported-vs-allocated-brand-result.svg)
 
-The scenario allocates $50,576.12 of advertising, $6,119.25 of storage, and $119.97 of subscription cost, offset by $89.25 of adjustment income. It reconciles exactly to the Amazon-level result, but it does **not** prove which SKU caused the cost.
+The allocation reconciles exactly: $50,576.12 advertising + $6,119.25 storage + $119.97 subscription − $89.25 adjustment income. It does **not** prove which SKU caused the cost.
 
 #### Product example: PawHaus dog bed
 
@@ -91,7 +89,7 @@ The scenario allocates $50,576.12 of advertising, $6,119.25 of storage, and $119
 | Allocated adjustment income | $3.22 |
 | **Fully loaded management scenario** | **($1,755.78)** |
 
-This is the requested economic color: the dog bed is barely profitable on attributable unit economics and becomes negative under a transparent shared-cost scenario. It is a prioritization signal for better attribution—not a claim that Amazon billed exactly $1,825.27 of advertising to this SKU.
+The dog bed is barely profitable on attributable costs and negative in the allocation scenario. That is a prioritization signal, not actual SKU-level ad billing.
 
 | Shared item | Current fallback | Better production driver |
 |---|---|---|
@@ -114,7 +112,7 @@ Refund rate is measured as refunded units divided by ordered units. Contribution
 | Peak Fuel | **2.8%** | `PF-WHEY-CHOC` | **3.4%** | **$328** reversed, the brand's largest refund impact |
 | PawHaus | **2.7%** | `PH-BED-MED-GRY` | **6.6%** | **$138** reversed; equal to 47.2% of remaining SKU contribution margin |
 
-**Insight:** GlowTheory has the broadest refund pressure, while the PawHaus dog bed is the clearest profitability risk because a modest number of refunds consumes nearly half of its remaining contribution margin. Investigate return reasons, listing expectations, and product quality before changing pricing or advertising.
+**Insight:** GlowTheory has the highest brand refund rate. The PawHaus dog bed is the clearest SKU risk because refunds consume 47.2% of its remaining contribution margin.
 
 Supporting detail: [brand refund analysis](processed/refund_analysis_by_brand.csv) · [SKU refund analysis](processed/refund_analysis_by_sku.csv)
 
@@ -130,14 +128,24 @@ Supporting detail: [assumptions and limitations](docs/assumptions_and_limitation
 
 ```mermaid
 flowchart LR
-    A["Days 1–30: Trust the feed"] --> B["Days 31–60: Reconcile finance"] --> C["Days 61–90: Improve decisions"]
+    A["Third-party ELT and APIs"] --> B["Bronze: raw JSON"]
+    B --> C["Silver: tolerant views"]
+    C --> D["Gold: stable marts"]
+    B --> E["Controls: drift and null alerts"]
+    C --> E
 ```
 
-| Timing | Priority | Result |
+The current third-party ELT remains useful. I would add a BigQuery control layer around it rather than replace it on day one.
+
+| Timing | Build | Outcome |
 |---|---|---|
-| **Days 1–30** | Reliable ingestion, raw history, schema alerts, identity/UOM mappings, source tie-outs | Trusted and replayable data feeds |
-| **Days 31–60** | Amazon management P&L, QuickBooks reconciliation, source drill-through | Repeatable finance reporting |
-| **Days 61–90** | REACH PO/receipt history, advertising attribution, inventory and cash outlook | Operational decisions from dependable history |
+| **Days 1–30: protect ingestion** | Catalog feeds and gaps; land append-only JSON plus run metadata; add retries, replay, schema-key snapshots, freshness, volume, and null-rate alerts | Source changes no longer erase evidence or silently reach reports |
+| **Days 31–60: stabilize finance** | Build Silver views with `LAX_*` parsing and approved `COALESCE(new_name, old_name)` fallbacks; add identity exceptions, Dataform tests, Gold contracts, and Amazon-to-QuickBooks tie-outs | Stable profitability reporting with source drill-through |
+| **Days 61–90: close gaps** | Add missing advertising, storage, return-reason, REACH receipt, and PO-status feeds; assign alert owners and test historical replay | Better SKU economics, inventory actions, and an operating runbook |
+
+**Guardrail:** Bronze captures first, but ingestion can still fail from authentication, rate limits, networks, or connector outages. Retries, raw retention, and replay make those failures recoverable. Only Silver/Gold publication is blocked by material quality issues.
+
+**Drift handling:** added optional keys warn; missing required keys, abnormal null spikes, or failed financial tie-outs stop the affected Gold refresh. JSON key order is irrelevant; CSV columns are read by header name, so order-only changes are informational.
 
 Start with the cost-aware GCP option; use managed connectors when reliability or implementation speed justifies the recurring cost. See [architecture options](docs/architecture_options.md).
 
