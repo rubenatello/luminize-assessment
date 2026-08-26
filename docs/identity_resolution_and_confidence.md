@@ -12,7 +12,7 @@ The files do not all contain the same identifiers which can be difficult. I woul
 | 4 | Approved brand field or SKU prefix | Brand only | C / 60 | Brand-level exception reporting only |
 | 5 | Missing or conflicting identifiers | No forced match | F / 0 | Hold in the exception table |
 
-I would not use fuzzy text matching to post a product key. It could suggest a possible match for review, but someone should approve the mapping before it affects finance reporting.
+This could suggest a possible match for review, but someone should be alerted and approve the mapping before it affects finance reporting.
 
 ## Why I separate the scores
 
