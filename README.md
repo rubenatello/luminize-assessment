@@ -1,8 +1,5 @@
 # Amazon Q2 2026 profitability assessment
 
-This submission answers the three requested deliverables: a BigQuery data model, Q2 contribution margin by brand and SKU, and a first-90-day automation plan.
-
-## Start here
 
 | Requested deliverable | Primary file | What it covers |
 |---|---|---|
