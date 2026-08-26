@@ -2,7 +2,16 @@
 
 ## Starting point
 
-Some Amazon data already reaches BigQuery through third-party APIs and ELT, and dbt is the transformation layer. I would keep that path, document its coverage, and add controls around it. Missing Amazon endpoints, QuickBooks, governed Sheets, and the operational system that owns PO/receipt data would feed the same model.
+The assignment confirms QuickBooks, REACH, and Google Sheets as business systems. Some Amazon data already reaches BigQuery through third-party APIs/ELT, and dbt is the transformation layer. I would keep that path, document its coverage, and add controls around it.
+
+| Component | Role in the proposed architecture |
+|---|---|
+| Amazon APIs/reports | Marketplace sales, fees, inventory, advertising, and returns source |
+| QuickBooks | Accounting ledger and reconciliation source |
+| REACH | Confirmed business source; profile its entities, API/exports, owner, and system-of-record responsibilities before modeling |
+| Google Sheets | Governed manual mappings, overrides, and operational inputs |
+| BigQuery | Central warehouse, raw history, controls, and reporting data |
+| dbt | Silver/Gold transformations, tests, lineage, and documentation |
 
 ## Operating design
 
@@ -30,9 +39,9 @@ If the current connector only delivers flattened tables, I would first confirm w
 
 | Timing | Work | Exit criteria |
 |---|---|---|
-| **Days 1–30: observe and protect** | Inventory endpoints, owners, refresh times, history, and gaps. Add raw JSON landing for critical feeds, run metadata, schema-key snapshots, retries/backfill, and initial freshness/volume alerts. Define SKU/ASIN/UOM ownership. | Critical feeds are replayable; failures and payload changes are visible; no source row is silently discarded. |
+| **Days 1–30: observe and protect** | Inventory Amazon, QuickBooks, REACH, and Sheet feeds, owners, refresh times, history, and gaps. Profile REACH entities and identifiers. Add raw landing for critical feeds, run metadata, schema-key snapshots, retries/backfill, and initial alerts. Define SKU/ASIN/UOM ownership. | Critical feeds are replayable; REACH's role is documented; failures and payload changes are visible; no source row is silently discarded. |
 | **Days 31–60: stabilize and reconcile** | Build dbt Silver models with tolerant parsing and versioned rename rules. Add required-field, uniqueness, null-rate, identity, and amount tests. Publish stable Gold marts and reconcile Amazon activity to QuickBooks. | Brand/SKU profitability ties to source and accounting within approved tolerances; BI reads only Gold. |
-| **Days 61–90: close gaps and operate** | Add advertising-by-ASIN, storage detail, return reasons, and PO/receipt status after confirming their source systems. Version governed Sheet inputs. Assign alert owners, write runbooks, test replay, and review service levels. | Fully loaded SKU economics use better drivers; inventory uses actual receipts/status; the team can recover a failed load without engineering heroics. |
+| **Days 61–90: close gaps and operate** | Add advertising-by-ASIN, storage detail, return reasons, and PO/receipt status. Use REACH for the operational facts discovery confirms it owns. Version governed Sheet inputs. Assign alert owners, write runbooks, test replay, and review service levels. | Fully loaded SKU economics use better drivers; inventory uses actual receipts/status; the team can recover a failed load without engineering heroics. |
 
 ## Drift and quality rules
 

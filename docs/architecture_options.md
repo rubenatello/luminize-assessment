@@ -6,7 +6,7 @@ The company already uses third-party ingestion, BigQuery, and dbt. The first dec
 
 ```mermaid
 flowchart LR
-    S["Amazon, QuickBooks, Sheets, operational sources"] --> E["Current ELT and APIs"]
+    S["Amazon, QuickBooks, REACH, Sheets"] --> E["Current ELT and APIs"]
     E --> B["BigQuery Bronze"]
     B --> D["dbt Silver, Gold, and tests"]
     D --> M["Finance and BI"]
@@ -17,7 +17,7 @@ flowchart LR
 - Keep the connector where coverage and reliability are acceptable.
 - Add dbt source freshness, tests, contracts, lineage, and reconciliation models.
 - Add BigQuery Scheduled Queries and Cloud Monitoring for payload-drift and cross-model alerts.
-- Confirm the source system for PO, receipt, and inventory data during discovery.
+- Profile REACH during discovery and use it only for the entities it is confirmed to own.
 
 ## Selective custom ingestion
 

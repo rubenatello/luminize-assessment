@@ -6,7 +6,7 @@ The goal is to trace every reported number to the source record and transformati
 
 | Layer | BigQuery datasets | Contents |
 |---|---|---|
-| **Bronze / raw** | `raw_amazon`, `raw_quickbooks`, `raw_operational`, `raw_sheets` | Source payload or file plus load time, endpoint/report, run ID, row hash, and contract version |
+| **Bronze / raw** | `raw_amazon`, `raw_quickbooks`, `raw_reach`, `raw_sheets` | Source payload or file plus load time, endpoint/report, run ID, row hash, and contract version |
 | **Silver / staging** | `stg_finance` | dbt models for typed fields, normalized identifiers, UOM rules, and source validation |
 | **Silver / core** | `core_finance` | Shared dimensions, identifier bridges, and transaction facts |
 | **Gold / reporting** | `mart_finance`, `mart_operations` | Profitability, inventory, reconciliation, and cash reporting |
@@ -15,13 +15,13 @@ The goal is to trace every reported number to the source record and transformati
 ```mermaid
 flowchart LR
     A["Amazon and QuickBooks"] --> R["Raw BigQuery datasets"]
-    B["Sheets and operational sources"] --> R
+    B["REACH and Sheets"] --> R
     R --> S["dbt staging and core"]
     S --> M["Gold marts"]
     S --> Q["Tests and exceptions"]
 ```
 
-The source for PO, receipt, and inventory lifecycle data should be confirmed during discovery rather than assumed.
+REACH is a confirmed source, but its exact entities and system-of-record responsibilities are not specified. Profile its API/exports, keys, history, and ownership before assigning facts to it.
 
 ## Main tables and keys
 
@@ -60,4 +60,4 @@ Missing required fields, material reconciliation differences, or ambiguous produ
 
 ## Tool choice
 
-Keep the current third-party ELT for covered sources, BigQuery for storage/compute, and dbt for transformations, tests, lineage, and documentation. Add native GCP jobs only for uncovered endpoints, raw-payload retention, or monitoring gaps. See [architecture options](architecture_options.md).
+Keep the current third-party ELT for covered Amazon, QuickBooks, REACH, and Sheet feeds; BigQuery for storage/compute; and dbt for transformations, tests, lineage, and documentation. Add native GCP jobs only for uncovered endpoints, raw-payload retention, or monitoring gaps. See [architecture options](architecture_options.md).
