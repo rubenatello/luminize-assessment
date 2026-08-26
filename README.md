@@ -38,11 +38,17 @@ Exact canonical SKU can identify a product; a prefix can suggest only its brand.
 | Q2 result | Amount |
 |---|---:|
 | Net sales after refunds and promotions | **$132,341.93** |
-| SKU-attributable contribution margin | **$51,242.63** |
+| Contribution margin before advertising | **$51,242.63** |
 | Contribution margin rate | **38.7%** |
-| Advertising / contribution margin | **98.7%** |
-| Run-rate result after platform costs, excluding adjustment | **($5,572.71)** |
+| Advertising expense | **($50,576.12)** |
+| Advertising as % of contribution margin | **98.7%** |
+| Contribution remaining after advertising | **$666.51** |
+| FBA storage fees | **($6,119.25)** |
+| Subscription fees | **($119.97)** |
+| Run-rate result after platform costs | **($5,572.71)** |
 | Reported result including $89.25 adjustment income | **($5,483.46)** |
+
+Advertising did not exceed contribution margin: it consumed 98.7% of it. Only $666.51, or 0.5% of net sales, remained to cover storage, subscription, corporate overhead, and profit.
 
 ![Contribution margin and platform costs](assets/contribution-margin-and-platform-costs.svg)
 
