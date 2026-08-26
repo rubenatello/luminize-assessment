@@ -176,3 +176,5 @@ python analysis/build_repo_charts.py
 ## AI-use disclosure
 
 OpenAI Codex 5.6 Sol assisted with documentation, pipeline-design examples, and illustrative SQL/Python. I reviewed the analysis and remain responsible for its conclusions. Production dbt/SQL would be authored, tested, and adapted by me after inspecting the actual BigQuery datasets, source contracts, and business rules; repository examples are not represented as deployed production code.
+
+Claude Fable 5 assisted with seeking external ingestion and ETL stack for analysis, landing on the suspected elevation of ELT --> Big Query --> Pipeline Resilience logging and debugging. I also had Fable 5 double check estimates and analysis for any overly optimistic figures that may not be considering other variables enough in the profitability of Amazon items after their contribution margin. 
