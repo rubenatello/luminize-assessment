@@ -34,9 +34,3 @@ Where cost was missing, I used a clearly flagged temporary estimate rather than 
 My first priority would be making the source data reliable and repeatable. That includes saving the raw API response or file, detecting schema changes, keeping a run log, validating totals, and maintaining the SKU/ASIN/UOM mappings.
 
 Once those controls are working, I would automate the management P&L and QuickBooks reconciliation. Inventory and forecasting come after that because they need dependable PO, receipt, cost, and demand history.
-
-## 5. Why I included two architecture options
-
-The cost-aware option keeps most of the work in Google Cloud and requires the team to own more connector maintenance. The managed option buys Amazon and QuickBooks ingestion and stronger monitoring, but at a higher recurring cost.
-
-I would start cost-aware unless connector reliability or implementation speed justifies the managed option. In either case, I would keep the same BigQuery tables and reporting definitions so changing vendors does not require rebuilding the finance logic.
