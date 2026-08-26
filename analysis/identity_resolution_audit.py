@@ -38,7 +38,7 @@ def main() -> None:
     exact = scoped["sku"].eq(scoped["canonical_sku"]) & scoped["canonical_sku"].ne("")
     unresolved_product = scoped["canonical_sku"].eq("")
     mapped_brand = scoped["brand_method"].eq("mapping") & scoped["brand"].ne("")
-    inferred_brand = scoped["brand_method"].eq("prefix") & scoped["brand"].ne("")
+    inferred_brand = scoped["brand_method"].eq("prefix_fallback") & scoped["brand"].ne("")
     unresolved_brand = scoped["brand"].eq("")
 
     asin_product_counts = (

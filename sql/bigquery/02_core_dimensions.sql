@@ -225,6 +225,7 @@ WITH normalized AS (
    AND b.identifier_type = 'SKU'
    AND b.is_current
    AND b.is_approved
+  WHERE po.po_date <= DATE '2026-06-30'
   QUALIFY ROW_NUMBER() OVER (
     PARTITION BY po._row_hash
     ORDER BY b.resolution_priority, b.product_confidence_score DESC

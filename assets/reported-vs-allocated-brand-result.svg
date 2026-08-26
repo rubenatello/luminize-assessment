@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="410" viewBox="0 0 1000 410" role="img" aria-labelledby="title desc">
-  <title id="title">Reported contribution margin versus fully loaded scenario by brand</title>
+  <title id="title">Reported contribution margin versus run-rate threshold by brand</title>
   <desc id="desc">GlowTheory declines from 20.5 thousand dollars to positive 2.2 thousand. Peak Fuel declines from 22.0 thousand to negative 1.8 thousand. PawHaus declines from 8.7 thousand to negative 5.8 thousand.</desc>
   <rect width="1000" height="410" rx="18" fill="#F7F9FC"/>
-  <text x="28" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172B4D">Shared costs change the brand story</text>
-  <text x="28" y="62" font-family="Arial, sans-serif" font-size="14" fill="#5E6C84">Reported contribution margin vs. estimated net-sales allocation</text>
+  <text x="28" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#172B4D">Shared costs test the brand story</text>
+  <text x="28" y="62" font-family="Arial, sans-serif" font-size="14" fill="#5E6C84">Reported contribution margin vs. estimated run-rate threshold</text>
 
   <rect x="650" y="27" width="18" height="12" rx="2" fill="#137C8B"/>
   <text x="676" y="38" font-family="Arial, sans-serif" font-size="13" fill="#344563">Reported CM</text>
   <rect x="798" y="27" width="18" height="12" rx="2" fill="#F4B942"/>
-  <text x="824" y="38" font-family="Arial, sans-serif" font-size="13" fill="#344563">Fully loaded scenario</text>
+  <text x="824" y="38" font-family="Arial, sans-serif" font-size="13" fill="#344563">Run-rate threshold</text>
 
   <line x1="343" y1="78" x2="343" y2="342" stroke="#7A869A" stroke-width="1.5"/>
   <line x1="217" y1="342" x2="919" y2="342" stroke="#C1C7D0" stroke-width="1"/>
@@ -39,6 +39,5 @@
   <text x="335" y="369" font-family="Arial, sans-serif" font-size="12" fill="#5E6C84">$0</text>
   <text x="578" y="369" font-family="Arial, sans-serif" font-size="12" fill="#5E6C84">$10K</text>
   <text x="829" y="369" font-family="Arial, sans-serif" font-size="12" fill="#5E6C84">$20K</text>
-  <text x="28" y="394" font-family="Arial, sans-serif" font-size="12" fill="#7A869A">Estimated scenario only; shared costs are allocated by net-sales share.</text>
+  <text x="28" y="394" font-family="Arial, sans-serif" font-size="12" fill="#7A869A">Estimated threshold only; shared platform costs are allocated by net-sales share.</text>
 </svg>
-

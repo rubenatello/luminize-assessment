@@ -7,12 +7,12 @@
 - Refunds retain the Amazon signs and reverse sales, promotions, referral fees, units, and landed COGS.
 - FBA fees are used as reported. Refund rows contain no FBA reversal, so refund CM impact is optimistic; the COGS reversal also assumes inventory is recoverable.
 - Refund rates use Q2 posted activity, not matched order cohorts. Q2 refunds can relate to earlier orders, and Q2 orders can refund later.
-- Landed unit cost uses quarter-wide weighted PO cost divided by sellable units. This can apply late-quarter purchases to earlier sales; receipt-date or moving-average costing requires opening layers and receipt dates.
+- Landed unit cost uses available PO records dated through June 30, divided by sellable units. One July 2 PO line is excluded. This estimate can still apply later purchases to earlier sales; receipt-layer costing requires opening inventory and receipt dates.
 - 'PH-DENTAL-30CT' PO cases are converted to sellable units at 12 units per case based on the description.
 - 'GT-LIP-BALM' and 'PH-TOY-ROPE-L' have no PO cost history. Each uses flagged brand-median landed cost. They represent $3,040.90 of net sales; a ±25% cost sensitivity moves total CM by ±$377.92 and flips both SKU-level conclusions.
 - 'PF-ELECTRO-CITRUS' is treated as a proposed alias of 'PF-ELECTRO-CIT'.
-- Advertising, storage, subscription fees, and adjustments remain below reported SKU-level contribution margin because the settlement rows do not contain a reliable SKU allocation key.
-- A separate threshold scenario allocates SKU-less rows by net-sales share. Every brand therefore receives the same 42.9% net shared-cost load, so the scenario tests breakeven and cannot change the reported CM ranking.
+- Advertising, storage, and subscription fees remain below reported SKU contribution margin because they lack SKU keys. Adjustments also remain below CM because their reason and accounting treatment are unknown, even though the two rows contain SKUs.
+- A separate threshold scenario allocates advertising, storage, and subscription by net-sales share. Every brand therefore receives the same 42.9% shared-cost load, so the scenario tests run-rate breakeven and cannot change the reported CM ranking.
 - Adjustment income is included in the reported platform result but excluded from run-rate advertising guardrails.
 - Inventory days cover uses quarter net units divided by 91 days as its demand rate and fulfillable units as on-hand inventory.
 - Refund rate is refunded units divided by ordered units. Refund contribution impact is the absolute contribution margin reversed by Refund rows.

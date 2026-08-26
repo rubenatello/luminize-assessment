@@ -2,11 +2,16 @@
 -- Missing costs are imputed at brand median and remain explicitly flagged.
 
 CREATE OR REPLACE TABLE `your_project.finance.mart_sku_profitability_q2_2026` AS
-WITH brand_cost_median AS (
-  SELECT p.brand, APPROX_QUANTILES(c.unit_landed_cost, 2)[OFFSET(1)] AS brand_median_unit_cost
+WITH brand_costs AS (
+  SELECT p.brand, c.unit_landed_cost
   FROM `your_project.finance.int_po_landed_unit_cost` c
   JOIN `your_project.finance.dim_product` p USING (canonical_sku)
-  GROUP BY p.brand
+), brand_cost_median AS (
+  SELECT DISTINCT
+    brand,
+    PERCENTILE_CONT(unit_landed_cost, 0.5) OVER (PARTITION BY brand)
+      AS brand_median_unit_cost
+  FROM brand_costs
 ), scoped AS (
   SELECT
     t.brand,

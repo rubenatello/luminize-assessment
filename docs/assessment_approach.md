@@ -25,7 +25,7 @@ I used the assignment's contribution-margin definition:
 
 `net product sales after refunds - promotions - referral fees - FBA fees - landed COGS`
 
-I kept advertising, storage, subscription fees, and adjustments below SKU-level contribution margin because the source does not provide a reliable allocation key. This avoids making one SKU look better or worse based on an arbitrary allocation.
+I kept advertising, storage, and subscription below SKU contribution margin because they lack product keys. I also kept adjustments separate because their accounting purpose is unknown. This avoids arbitrary attribution.
 
 Where cost was missing, I used a clearly flagged temporary estimate rather than dropping the sales or assigning zero cost.
 

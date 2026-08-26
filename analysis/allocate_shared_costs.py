@@ -21,7 +21,6 @@ COST_TYPES = {
     "FBA Storage Fee": "allocated_fba_storage",
     "Subscription Fee": "allocated_subscription",
 }
-INCOME_TYPE = "Adjustment"
 
 
 def main() -> None:
@@ -49,7 +48,7 @@ def main() -> None:
         raise ValueError(f"Missing SKU profitability columns: {sorted(missing_sku)}")
 
     amounts = overhead.set_index("transaction_type")["signed_amount"]
-    missing_types = set(COST_TYPES).union({INCOME_TYPE}).difference(amounts.index)
+    missing_types = set(COST_TYPES).difference(amounts.index)
     if missing_types:
         raise ValueError(f"Missing overhead transaction types: {sorted(missing_types)}")
 
@@ -81,18 +80,14 @@ def main() -> None:
             -float(amounts.loc[transaction_type]) * scenario["net_sales_allocation_share"]
         )
 
-    scenario["allocated_adjustment_income"] = (
-        float(amounts.loc[INCOME_TYPE]) * scenario["net_sales_allocation_share"]
-    )
-    scenario["fully_loaded_scenario_result"] = (
+    scenario["run_rate_threshold_result"] = (
         scenario["reported_contribution_margin"]
         - scenario["allocated_advertising"]
         - scenario["allocated_fba_storage"]
         - scenario["allocated_subscription"]
-        + scenario["allocated_adjustment_income"]
     )
-    scenario["fully_loaded_scenario_margin_pct"] = (
-        scenario["fully_loaded_scenario_result"] / scenario["net_sales"]
+    scenario["run_rate_threshold_margin_pct"] = (
+        scenario["run_rate_threshold_result"] / scenario["net_sales"]
     )
     scenario["allocation_method"] = "net_sales_share"
     scenario["is_estimated"] = True
@@ -105,22 +100,22 @@ def main() -> None:
             allocated_advertising=("allocated_advertising", "sum"),
             allocated_fba_storage=("allocated_fba_storage", "sum"),
             allocated_subscription=("allocated_subscription", "sum"),
-            allocated_adjustment_income=("allocated_adjustment_income", "sum"),
-            fully_loaded_scenario_result=("fully_loaded_scenario_result", "sum"),
+            run_rate_threshold_result=("run_rate_threshold_result", "sum"),
         )
     )
     brand["reported_contribution_margin_pct"] = (
         brand["reported_contribution_margin"] / brand["net_sales"]
     )
-    brand["fully_loaded_scenario_margin_pct"] = (
-        brand["fully_loaded_scenario_result"] / brand["net_sales"]
+    brand["run_rate_threshold_margin_pct"] = (
+        brand["run_rate_threshold_result"] / brand["net_sales"]
     )
     brand["allocation_method"] = "net_sales_share"
     brand["is_estimated"] = True
     brand = brand.sort_values("net_sales", ascending=False)
 
-    expected_result = float(scenario["reported_contribution_margin"].sum() + amounts.sum())
-    actual_result = float(scenario["fully_loaded_scenario_result"].sum())
+    shared_cost_total = sum(float(-amounts.loc[name]) for name in COST_TYPES)
+    expected_result = float(scenario["reported_contribution_margin"].sum() - shared_cost_total)
+    actual_result = float(scenario["run_rate_threshold_result"].sum())
     if not math.isclose(actual_result, expected_result, abs_tol=0.01):
         raise AssertionError(
             f"Scenario does not reconcile: actual={actual_result:.2f}, "
@@ -130,10 +125,12 @@ def main() -> None:
     scenario.to_csv(
         args.output_dir / "allocated_profitability_scenario_by_sku.csv",
         index=False,
+        float_format="%.8f",
     )
     brand.to_csv(
         args.output_dir / "allocated_profitability_scenario_by_brand.csv",
         index=False,
+        float_format="%.8f",
     )
 
     summary = {
@@ -143,8 +140,8 @@ def main() -> None:
         "reported_contribution_margin": round(
             float(scenario["reported_contribution_margin"].sum()), 2
         ),
-        "fully_loaded_scenario_result": round(actual_result, 2),
-        "negative_skus": int((scenario["fully_loaded_scenario_result"] < 0).sum()),
+        "run_rate_threshold_result": round(actual_result, 2),
+        "negative_skus": int((scenario["run_rate_threshold_result"] < 0).sum()),
         "total_skus": int(len(scenario)),
     }
     print(json.dumps(summary, indent=2))
@@ -152,4 +149,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

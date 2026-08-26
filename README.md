@@ -7,7 +7,7 @@ This README is the 20–25 minute presentation. Links provide calculation receip
 | **1. BigQuery data model** | [Model](docs/data_model.md) · [identity rules](docs/identity_resolution_and_confidence.md) · [drift/replay](docs/schema_drift_replay_and_validation.md) |
 | **2. Profitability analysis** | [Workbook](deliverables/Amazon_Q2_2026_Profitability_Analysis.xlsx) · [brand results](processed/brand_profitability.csv) · [24 SKU results](processed/sku_profitability.csv) |
 | **3. 90-day automation plan** | [Plan](docs/automation_90_day_plan.md) · [architecture](docs/architecture_options.md) |
-| **Supporting files** | [Written brief](deliverables/Amazon_Q2_2026_Assessment_Brief.docx) · [BigQuery SQL](sql/bigquery/) |
+| **Supporting files** | [Original inputs](Originals/) · [BigQuery SQL](sql/bigquery/) |
 
 ## 1. BigQuery model: confidence before perfection
 
@@ -76,7 +76,8 @@ This receipt is intentionally an outlier: the dog bed is the lowest-margin **non
 | `PH-DENTAL-30CT` ordered by case | Converted each case to 12 sellable units before unit-cost calculation |
 | `PF-ELECTRO-CITRUS` alias | Mapped through an auditable alias to `PF-ELECTRO-CIT` |
 | ASIN `B0GTRLRJDE` identifies two products | Joined by approved SKU and blocked ASIN-only matching |
-| Advertising, storage, and subscription lack SKU keys | Kept below reported SKU CM; net-sales allocation is labeled as a threshold check |
+| PO file includes one July 2 line | Excluded it from Q2 costing; used available PO records dated through June 30 |
+| Shared platform costs lack SKU keys | Kept below reported SKU CM; adjustments remain separate because their accounting purpose is unknown |
 
 [Full quality register](processed/data_quality_register.csv) · [assumptions and limitations](docs/assumptions_and_limitations.md)
 
@@ -88,22 +89,22 @@ SKU-less costs are allocated by net-sales share for direction—not reported SKU
 
 `Allocated advertising = $50,576.12 × brand net sales share`
 
-`Net shared-cost load = ($50,576.12 + $6,119.25 + $119.97 − $89.25) ÷ $132,341.93 = 42.9%`
+`Shared-cost load = ($50,576.12 + $6,119.25 + $119.97) ÷ $132,341.93 = 42.9%`
 
 Every brand receives that same percentage. This is a breakeven threshold check—not cost attribution—and it cannot change the reported CM ranking. FBA fulfillment is already recorded by SKU and is not reallocated.
 
-| Brand | Net sales | Reported CM | Allocated advertising | Threshold result | Threshold margin |
+| Brand | Net sales | Reported CM | Allocated advertising | Run-rate threshold | Threshold margin |
 |---|---:|---:|---:|---:|---:|
-| GlowTheory | $42,872.51 | $20,548.22 | ($16,384.26) | **$2,171.66** | **5.1%** |
-| Peak Fuel | $55,656.70 | $22,027.05 | ($21,269.90) | **($1,829.23)** | **(3.3%)** |
-| PawHaus | $33,812.72 | $8,667.36 | ($12,921.95) | **($5,825.88)** | **(17.2%)** |
-| **Total** | **$132,341.93** | **$51,242.63** | **($50,576.12)** | **($5,483.46)** | **(4.1%)** |
+| GlowTheory | $42,872.51 | $20,548.22 | ($16,384.26) | **$2,142.74** | **5.0%** |
+| Peak Fuel | $55,656.70 | $22,027.05 | ($21,269.90) | **($1,866.77)** | **(3.4%)** |
+| PawHaus | $33,812.72 | $8,667.36 | ($12,921.95) | **($5,848.69)** | **(17.3%)** |
+| **Total** | **$132,341.93** | **$51,242.63** | **($50,576.12)** | **($5,572.71)** | **(4.2%)** |
 
 Brand rows are rounded; unrounded allocations reconcile to $50,576.12.
 
 ![Reported contribution margin versus net-sales allocation threshold](assets/reported-vs-allocated-brand-result.svg)
 
-The threshold result deducts allocated advertising, storage, and subscription, then adds adjustment income. Adjustment income is shown separately from run-rate decisions. Preferred production drivers are advertised-ASIN spend and SKU cubic-foot-days.
+The threshold deducts allocated advertising, storage, and subscription. The $89.25 adjustment is excluded from run-rate decisions and shown only in the reported total. Preferred production drivers are advertised-ASIN spend and SKU cubic-foot-days.
 
 ### Advertising guardrail sensitivity
 
@@ -174,7 +175,7 @@ QuickBooks is the accounting ledger; REACH is the financial reporting system; Sh
 - Refund rates use posted-period activity, not matched order cohorts.
 - Shared costs remain below reported SKU CM; the net-sales view is a threshold check.
 - Adjustment income is excluded from run-rate ad guardrails.
-- Quarter-wide PO costing can apply late-quarter purchases to earlier sales.
+- Available PO records dated through June 30 set one weighted cost; receipt-layer COGS is unavailable.
 - `PH-DENTAL-30CT` uses a 12-unit case pack.
 - `GT-LIP-BALM` and `PH-TOY-ROPE-L` use flagged brand-median costs.
 - `PF-ELECTRO-CITRUS` aliases `PF-ELECTRO-CIT`.
@@ -182,14 +183,16 @@ QuickBooks is the accounting ledger; REACH is the financial reporting system; Sh
 
 ## Reproduce
 
+The supplied source files are preserved unchanged in [`Originals/`](Originals/).
+
 ```bash
 pip install -r requirements.txt
 
 python analysis/profitability_analysis.py \
-  --mapping "/path/to/sku_asin_brand_mapping.csv" \
-  --purchase-orders "/path/to/purchase_orders_landed_cost.csv" \
-  --inventory "/path/to/inventory_snapshot_2026-06-30.csv" \
-  --settlements "/path/to/amazon_settlements_apr-jun_2026.csv" \
+  --mapping "Originals/sku_asin_brand_mapping.csv" \
+  --purchase-orders "Originals/purchase_orders_landed_cost.csv" \
+  --inventory "Originals/inventory_snapshot_2026-06-30.csv" \
+  --settlements "Originals/amazon_settlements_apr-jun_2026.csv" \
   --output-dir processed
 
 python analysis/identity_resolution_audit.py \
@@ -204,6 +207,6 @@ Bash/zsh is shown; on PowerShell, run each Python command on one line.
 
 ## AI-use disclosure
 
-OpenAI Codex 5.6 Sol assisted with documentation, pipeline-design examples, and illustrative SQL/Python. I reviewed the analysis and remain responsible for its conclusions. Production dbt/SQL would be authored, tested, and adapted by me after inspecting the actual BigQuery datasets, source contracts, and business rules; repository examples are not represented as deployed production code.
+OpenAI Codex 5.6 Sol assisted with documentation, pipeline-design examples, and illustrative SQL/Python. I reviewed the analysis and remain responsible for its conclusions. Production dbt/SQL would be authored and tested against the actual BigQuery schemas and business rules.
 
-Claude Fable 5 assisted with seeking external ingestion and ETL stack for analysis, landing on the suspected elevation of ELT --> Big Query --> Pipeline Resilience logging and debugging. I also had Fable 5 double check estimates and analysis for any overly optimistic figures that may not be considering other variables enough in the profitability of Amazon items after their contribution margin. 
+Claude Fable 5 provided an independent critique of the profitability interpretation, prompting clearer advertising guardrails, refund caveats, and sensitivity notes.

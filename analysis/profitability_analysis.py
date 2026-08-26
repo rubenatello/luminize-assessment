@@ -89,8 +89,13 @@ def build_costs(po: pd.DataFrame, mapping: pd.DataFrame) -> tuple[pd.DataFrame, 
     po["line_recalc"] = po["qty"] * po["unit_cost"] + po["freight_duty_alloc"]
     po["line_recalc_delta"] = po["line_recalc"] - po["total_cost"]
 
+    # Pre-quarter purchases may support Q2 cost, but later POs cannot. Receipt-
+    # layer costing is not possible without receipt dates and opening inventory.
+    po["excluded_from_q2_cost"] = po["po_date"] > QUARTER_END
+    costing_po = po.loc[~po["excluded_from_q2_cost"]].copy()
+
     costs = (
-        po.groupby("canonical_sku", as_index=False)
+        costing_po.groupby("canonical_sku", as_index=False)
         .agg(
             po_lines=("po_number", "size"),
             first_po_date=("po_date", "min"),
@@ -331,7 +336,6 @@ def build_refund_analysis(tx: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]
 def data_quality_register(
     mapping: pd.DataFrame,
     po_detail: pd.DataFrame,
-    costs: pd.DataFrame,
     settlements: pd.DataFrame,
     tx: pd.DataFrame,
     inventory: pd.DataFrame,
@@ -342,6 +346,8 @@ def data_quality_register(
         (inventory["raw_sku"] == "PF-ELECTRO-CITRUS").sum()
     )
     missing_sku_rows = int(settlements["sku"].isna().sum())
+    adjustment_rows = int(settlements["transaction_type"].eq("Adjustment").sum())
+    post_quarter_po = po_detail.loc[po_detail["excluded_from_q2_cost"], "po_number"].tolist()
     outside_quarter = int(
         (~settlements["posted_date"].between(QUARTER_START, QUARTER_END)).sum()
     )
@@ -376,16 +382,22 @@ def data_quality_register(
         },
         {
             "severity": "Medium",
-            "issue": "Platform fees and adjustments have no usable SKU allocation key",
-            "evidence": f"{missing_sku_rows} settlement rows lack SKU, including advertising, storage, and subscription fees.",
-            "resolution": "Kept these amounts below SKU-attributable contribution margin; did not force an allocation.",
+            "issue": "Shared platform costs lack SKU keys; adjustments lack accounting detail",
+            "evidence": (
+                f"{missing_sku_rows} advertising/storage/subscription rows lack SKU; "
+                f"{adjustment_rows} adjustment rows have SKU but no reason or accounting treatment."
+            ),
+            "resolution": "Kept both below SKU contribution margin; allocated only shared platform costs in the threshold check.",
             "ongoing_control": "Ingest advertising campaign/product reports and storage SKU detail before allocation.",
         },
         {
             "severity": "Medium",
             "issue": "PO data has no receipt/status lifecycle",
-            "evidence": "PO date and inbound snapshot cannot prove whether a PO is open, shipped, received, or canceled.",
-            "resolution": "Used PO lines only for weighted landed unit cost; did not label PO quantities as inbound.",
+            "evidence": (
+                "PO date does not prove receipt/status; "
+                f"{len(post_quarter_po)} post-quarter line ({', '.join(post_quarter_po)}) was excluded."
+            ),
+            "resolution": "Used available PO lines dated through June 30 for weighted cost; did not label PO quantities as inbound.",
             "ongoing_control": "Add PO header/status, expected ship/arrival, receipt, and Amazon shipment IDs.",
         },
         {
@@ -401,7 +413,7 @@ def data_quality_register(
             "evidence": (
                 f"{outside_quarter} settlement rows outside Q2; max settlement delta "
                 f"${settlements['settlement_delta'].abs().max():.6f}; max PO delta "
-                f"${costs['max_line_check_delta'].max():.6f}."
+                f"${po_detail['line_recalc_delta'].abs().max():.6f}."
             ),
             "resolution": "Confirmed Q2 date scope and arithmetic tie-outs within floating-point tolerance.",
             "ongoing_control": "Block reporting when date, row-count, or amount reconciliation tests exceed tolerance.",
@@ -431,7 +443,7 @@ def main() -> None:
     )
     inventory = build_inventory(inv_raw, mapping, sku)
     refund_sku, refund_brand = build_refund_analysis(tx)
-    dq = data_quality_register(mapping, po_detail, costs, st, tx, inventory)
+    dq = data_quality_register(mapping, po_detail, st, tx, inventory)
 
     net_sales = float(brand["net_sales"].sum())
     cm = float(brand["contribution_margin"].sum())

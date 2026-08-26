@@ -18,10 +18,10 @@
     "settlement_row_count": 4615,
     "cm_transaction_row_count": 4604,
     "source_files": {
-      "mapping": "Copy of sku_asin_brand_mapping.csv",
-      "purchase_orders": "Copy of purchase_orders_landed_cost.csv",
-      "inventory": "Copy of inventory_snapshot_2026-06-30.csv",
-      "settlements": "Copy of amazon_settlements_apr-jun_2026.csv"
+      "mapping": "sku_asin_brand_mapping.csv",
+      "purchase_orders": "purchase_orders_landed_cost.csv",
+      "inventory": "inventory_snapshot_2026-06-30.csv",
+      "settlements": "amazon_settlements_apr-jun_2026.csv"
     }
   },
   "brand_profitability": [
@@ -1458,13 +1458,13 @@
     },
     {
       "canonical_sku": "PH-BRUSH-DBL",
-      "po_lines": 2,
+      "po_lines": 1,
       "first_po_date": "2026-03-11 00:00:00",
-      "last_po_date": "2026-07-02 00:00:00",
-      "purchased_units": 600,
-      "product_cost": 1434.0,
-      "freight_duty": 124.80000000000001,
-      "landed_cost_total": 1558.8000000000002,
+      "last_po_date": "2026-03-11 00:00:00",
+      "purchased_units": 400,
+      "product_cost": 956.0,
+      "freight_duty": 83.2,
+      "landed_cost_total": 1039.2,
       "max_line_check_delta": 0.0,
       "case_pack": 1,
       "unit_landed_cost": 2.5980000000000003,
@@ -1628,16 +1628,16 @@
     },
     {
       "severity": "Medium",
-      "issue": "Platform fees and adjustments have no usable SKU allocation key",
-      "evidence": "9 settlement rows lack SKU, including advertising, storage, and subscription fees.",
-      "resolution": "Kept these amounts below SKU-attributable contribution margin; did not force an allocation.",
+      "issue": "Shared platform costs lack SKU keys; adjustments lack accounting detail",
+      "evidence": "9 advertising/storage/subscription rows lack SKU; 2 adjustment rows have SKU but no reason or accounting treatment.",
+      "resolution": "Kept both below SKU contribution margin; allocated only shared platform costs in the threshold check.",
       "ongoing_control": "Ingest advertising campaign/product reports and storage SKU detail before allocation."
     },
     {
       "severity": "Medium",
       "issue": "PO data has no receipt/status lifecycle",
-      "evidence": "PO date and inbound snapshot cannot prove whether a PO is open, shipped, received, or canceled.",
-      "resolution": "Used PO lines only for weighted landed unit cost; did not label PO quantities as inbound.",
+      "evidence": "PO date does not prove receipt/status; 1 post-quarter line (PO-2026-0183) was excluded.",
+      "resolution": "Used available PO lines dated through June 30 for weighted cost; did not label PO quantities as inbound.",
       "ongoing_control": "Add PO header/status, expected ship/arrival, receipt, and Amazon shipment IDs."
     },
     {

@@ -1,5 +1,4 @@
-brand,net_sales,reported_contribution_margin,allocated_advertising,allocated_fba_storage,allocated_subscription,allocated_adjustment_income,fully_loaded_scenario_result,reported_contribution_margin_pct,fully_loaded_scenario_margin_pct,allocation_method,is_estimated
-Peak Fuel,55656.700000,22027.052000,21269.902426,2573.464521,50.453657,37.534291,-1829.234313,0.39576640,-0.03286638,net_sales_share,True
-GlowTheory,42872.510000,20548.219000,16384.264688,1982.346841,38.864591,28.912768,2171.655648,0.47928659,0.05065380,net_sales_share,True
-PawHaus,33812.720000,8667.357279,12921.952886,1563.438639,30.651752,22.802941,-5825.883055,0.25633422,-0.17229856,net_sales_share,True
-
+brand,net_sales,reported_contribution_margin,allocated_advertising,allocated_fba_storage,allocated_subscription,run_rate_threshold_result,reported_contribution_margin_pct,run_rate_threshold_margin_pct,allocation_method,is_estimated
+Peak Fuel,55656.70000000,22027.05200000,21269.90242627,2573.46452084,50.45365667,-1866.76860378,0.39576640,-0.03354077,net_sales_share,True
+GlowTheory,42872.51000000,20548.21900000,16384.26468815,1982.34684062,38.86459133,2142.74287990,0.47928659,0.04997941,net_sales_share,True
+PawHaus,33812.72000000,8667.35727946,12921.95288558,1563.43863853,30.65175201,-5848.68599666,0.25633422,-0.17297295,net_sales_share,True

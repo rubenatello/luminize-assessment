@@ -17,9 +17,9 @@
   "settlement_row_count": 4615,
   "cm_transaction_row_count": 4604,
   "source_files": {
-    "mapping": "Copy of sku_asin_brand_mapping.csv",
-    "purchase_orders": "Copy of purchase_orders_landed_cost.csv",
-    "inventory": "Copy of inventory_snapshot_2026-06-30.csv",
-    "settlements": "Copy of amazon_settlements_apr-jun_2026.csv"
+    "mapping": "sku_asin_brand_mapping.csv",
+    "purchase_orders": "purchase_orders_landed_cost.csv",
+    "inventory": "inventory_snapshot_2026-06-30.csv",
+    "settlements": "amazon_settlements_apr-jun_2026.csv"
   }
 }
