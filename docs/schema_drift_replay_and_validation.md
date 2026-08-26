@@ -71,7 +71,7 @@ Use BigQuery time travel for recent mistakes and scheduled snapshots where finan
 
 ## Google Sheets
 
-Sheets can hold finance-owned aliases, case packs, and approved overrides, but the live Sheet is not historical evidence. Copy it to a dated BigQuery table on a schedule and retain Sheet ID, tab/range, modified time, row hashes, and run ID. Validate headers, duplicate keys, effective dates, and product relationships before publishing changes.
+Sheets can hold finance-owned aliases, case packs, and approved overrides, but the live Sheet is not historical evidence. Copy it to a dated BigQuery table on a schedule and retain Sheet ID, tab/range, modified time, row hashes, and run ID. Validate headers, duplicate keys, effective dates, and product relationships before publishing changes. Also worth considering since Google Sheets is capable, is there a Google Sheet that provides mapping for SKU's and ASIN? this as a live sheet can be fed to the Big Query as a source of truth, allowing for updates as needed as things change.
 
 ## References
 
