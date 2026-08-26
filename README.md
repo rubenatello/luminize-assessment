@@ -1,31 +1,29 @@
 # Amazon Q2 2026 profitability assessment
 
-This README is the 20–25 minute presentation. Linked files are the calculation receipts.
+This README is the 20–25 minute presentation. Links provide calculation receipts and implementation detail.
 
-| Requested deliverable | Primary file | What it covers |
-|---|---|---|
-| **1. Data model** | [Written brief](deliverables/Amazon_Q2_2026_Assessment_Brief.docx) | BigQuery layers, keys, identity resolution, schema drift, and ongoing quality controls |
-| **2. Profitability analysis** | [Analysis workbook](deliverables/Amazon_Q2_2026_Profitability_Analysis.xlsx) | Brand/SKU contribution margin, assumptions, exceptions, inventory, and reconciliations |
-| **3. 90-day automation proposal** | [90-day plan](docs/automation_90_day_plan.md) | QuickBooks/REACH/Sheets ingestion, BigQuery/dbt controls, ownership, and sequence |
-| **Presentation** | **This README** | The complete narrative, examples, visuals, findings, and recommendations |
+| Deliverable | Primary evidence |
+|---|---|
+| **1. BigQuery data model** | [Model](docs/data_model.md) · [identity rules](docs/identity_resolution_and_confidence.md) · [drift/replay](docs/schema_drift_replay_and_validation.md) |
+| **2. Profitability analysis** | [Workbook](deliverables/Amazon_Q2_2026_Profitability_Analysis.xlsx) · [brand results](processed/brand_profitability.csv) · [24 SKU results](processed/sku_profitability.csv) |
+| **3. 90-day automation plan** | [Plan](docs/automation_90_day_plan.md) · [architecture](docs/architecture_options.md) |
+| **Supporting files** | [Written brief](deliverables/Amazon_Q2_2026_Assessment_Brief.docx) · [BigQuery SQL](sql/bigquery/) |
 
-## 1. Data model: confidence before perfection
+## 1. BigQuery model: confidence before perfection
 
-Keep source evidence, business rules, and reporting outputs separate. Publish only records that pass structural, financial, and identity checks.
+**Method:** preserve raw evidence, resolve identity once, and expose only controlled reporting models.
 
 ![Trusted data foundation](assets/trusted-data-foundation.svg)
 
-Resolve identity once: exact SKU can identify a product, a prefix can suggest only the brand, and conflicts stay in an exception queue.
+Exact canonical SKU can identify a product; a prefix can suggest only its brand. Conflicts remain visible.
 
 ![Confidence-based identity resolution](assets/identity-confidence-ladder.svg)
 
-**Publication rule:** publish high-confidence matches, warn on provisional matches within an agreed threshold, and quarantine conflicts with their dollar exposure and owner.
+**Publish:** high-confidence matches proceed, provisional matches warn, and conflicts quarantine with owner and dollar exposure.
 
-Supporting detail: [data model](docs/data_model.md) · [identity rules](docs/identity_resolution_and_confidence.md) · [schema drift and replay](docs/schema_drift_replay_and_validation.md) · [BigQuery SQL](sql/bigquery/)
+## 2. Q2 profitability
 
-## 2. Profitability analysis
-
-Contribution margin is net product sales after refunds and promotions, less referral fees, FBA fulfillment fees, and landed COGS.
+`Contribution margin = net product sales after refunds/promotions − referral fees − FBA fulfillment − landed COGS`
 
 | Q2 result | Amount |
 |---|---:|
@@ -38,129 +36,100 @@ Contribution margin is net product sales after refunds and promotions, less refe
 
 ![Contribution margin by brand](assets/brand-contribution-margin.svg)
 
-### One transaction, traced from sale to contribution margin
+### Transaction receipt
 
-Order `114-1003986-4269335` for `PH-BED-MED-GRY` shows the calculation.
+Order `114-1003986-4269335`, SKU `PH-BED-MED-GRY`:
 
-| Step | Source field | Amount |
+| Step | Source | Amount |
 |---|---|---:|
-| Product sale | Settlement `product_sales` | **$42.99** |
-| Promotion | Settlement `promotional_rebates` | **($4.30)** |
-| Net product sales | Calculated | **$38.69** |
-| Referral fee | Settlement `selling_fees` | **($5.80)** |
-| FBA fulfillment fee | Settlement `fba_fees` | **($12.40)** |
-| Landed COGS | PO weighted landed unit cost | **($19.70)** |
+| Product sale | Settlement `product_sales` | $42.99 |
+| Promotion | Settlement `promotional_rebates` | ($4.30) |
+| Net product sales | Calculated | $38.69 |
+| Referral fee | Settlement `selling_fees` | ($5.80) |
+| FBA fulfillment | Settlement `fba_fees` | ($12.40) |
+| Landed COGS | PO weighted landed cost | ($19.70) |
 | **Contribution margin** | Calculated | **$0.79** |
 
-Three PO lines support the landed cost: $23,556.00 product cost plus $2,048.80 freight/duty over 1,300 units equals **$19.696 per unit**. The sale earns only **$0.79** before shared costs; the SKU earns **$291.44** for the quarter.
+Landed cost receipt: ($23,556.00 product + $2,048.80 freight/duty) ÷ 1,300 units = **$19.696 per unit**.
 
-Receipts: [transformed settlement rows](processed/settlement_transactions_transformed.csv) · [PO landed-cost summary](processed/po_unit_costs.csv) · [SKU profitability](processed/sku_profitability.csv)
+[Settlement rows](processed/settlement_transactions_transformed.csv) · [PO costs](processed/po_unit_costs.csv) · [SKU results](processed/sku_profitability.csv)
 
-### Management allocation scenario: directional, not reported profit
+### Fully loaded management scenario
 
-For management color, allocate SKU-less costs by each SKU's share of Q2 net sales and show the estimate beside reported contribution margin.
+SKU-less costs are allocated by net-sales share for direction—not reported SKU profit.
 
-`SKU allocation share = SKU net sales / $132,341.93`
+`Allocation share = SKU net sales ÷ $132,341.93`
 
-`Fully loaded scenario = reported contribution margin - allocated advertising - allocated storage - allocated subscription + allocated adjustment`
+FBA fulfillment is not reallocated; refunds already reduce net sales and contribution margin.
 
-Do not allocate FBA **fulfillment** again; it is already assigned to SKU. Do not add a refund weight; refunds already reduce net sales and contribution margin.
-
-| Brand | Net sales | Reported contribution margin | Fully loaded scenario | Scenario margin |
+| Brand | Net sales | Reported CM | Fully loaded scenario | Scenario margin |
 |---|---:|---:|---:|---:|
 | GlowTheory | $42,872.51 | $20,548.22 | **$2,171.66** | **5.1%** |
 | Peak Fuel | $55,656.70 | $22,027.05 | **($1,829.23)** | **(3.3%)** |
 | PawHaus | $33,812.72 | $8,667.36 | **($5,825.88)** | **(17.2%)** |
 | **Total** | **$132,341.93** | **$51,242.63** | **($5,483.46)** | **(4.1%)** |
 
-![Reported contribution margin versus fully loaded scenario by brand](assets/reported-vs-allocated-brand-result.svg)
+![Reported contribution margin versus fully loaded scenario](assets/reported-vs-allocated-brand-result.svg)
 
-The allocation reconciles exactly: $50,576.12 advertising + $6,119.25 storage + $119.97 subscription − $89.25 adjustment income. It does **not** prove which SKU caused the cost.
+The scenario allocates $50,576.12 advertising, $6,119.25 storage, and $119.97 subscription, offset by $89.25 adjustment income.
 
-#### Product example: PawHaus dog bed
-
-| Q2 `PH-BED-MED-GRY` bridge | Amount |
+| Dog-bed Q2 example | Amount |
 |---|---:|
-| Net sales after refunds and promotions | $4,776.16 |
-| Reported contribution margin after referral, FBA fulfillment, and landed COGS | **$291.44** |
-| Allocated advertising scenario | ($1,825.27) |
-| Allocated FBA storage scenario | ($220.84) |
-| Allocated subscription scenario | ($4.33) |
-| Allocated adjustment income | $3.22 |
-| **Fully loaded management scenario** | **($1,755.78)** |
+| Net sales | $4,776.16 |
+| Reported contribution margin | $291.44 |
+| Net shared-cost allocation | ($2,047.22) |
+| **Fully loaded scenario** | **($1,755.78)** |
 
-The dog bed is barely profitable on attributable costs and negative in the allocation scenario. That is a prioritization signal, not actual SKU-level ad billing.
+This flags economic risk; it does not claim actual SKU-level advertising. Preferred production drivers are advertised-ASIN spend and SKU cubic-foot-days.
 
-| Shared item | Current fallback | Better production driver |
-|---|---|---|
-| Advertising | Net-sales share | Campaign/ad-group spend tied to advertised ASIN/SKU |
-| FBA storage | Net-sales share | SKU cubic-foot-days or average inventory volume |
-| Subscription | Net-sales share; immaterial | Keep as account overhead unless leadership requires full absorption |
-| Adjustment income | Net-sales share for reconciliation | Source-specific reason and product key when available |
-
-Scenario receipts: [brand allocation](processed/allocated_profitability_scenario_by_brand.csv) · [SKU allocation](processed/allocated_profitability_scenario_by_sku.csv) · [reproducible script](analysis/allocate_shared_costs.py)
+[Brand scenario](processed/allocated_profitability_scenario_by_brand.csv) · [SKU scenario](processed/allocated_profitability_scenario_by_sku.csv) · [script](analysis/allocate_shared_costs.py)
 
 ### Refund risk
 
-Refund rate is measured as refunded units divided by ordered units. Contribution impact is the contribution margin reversed by refund rows.
+`Refund rate = refunded units ÷ ordered units`
+
+| Brand | Brand rate | Highest-risk SKU | SKU rate | CM effect |
+|---|---:|---|---:|---:|
+| GlowTheory | **4.9%** | `GT-MASK-CLAY` | **10.7%** | $143 reversed; 28.9% of remaining SKU CM |
+| Peak Fuel | **2.8%** | `PF-WHEY-CHOC` | **3.4%** | $328 reversed |
+| PawHaus | **2.7%** | `PH-BED-MED-GRY` | **6.6%** | $138 reversed; 47.2% of remaining SKU CM |
 
 ![Q2 unit refund rate by brand](assets/refund-rate-by-brand.svg)
 
-| Brand | Brand refund rate | SKU requiring attention | SKU refund rate | Contribution-margin impact |
-|---|---:|---|---:|---:|
-| GlowTheory | **4.9%** | `GT-MASK-CLAY` | **10.7%** | **$143** reversed; equal to 28.9% of remaining SKU contribution margin |
-| Peak Fuel | **2.8%** | `PF-WHEY-CHOC` | **3.4%** | **$328** reversed, the brand's largest refund impact |
-| PawHaus | **2.7%** | `PH-BED-MED-GRY` | **6.6%** | **$138** reversed; equal to 47.2% of remaining SKU contribution margin |
+**Top recommendations**
 
-**Insight:** GlowTheory has the highest brand refund rate. The PawHaus dog bed is the clearest SKU risk because refunds consume 47.2% of its remaining contribution margin.
+1. Replace shared-cost estimates with advertised-ASIN and SKU-storage data.
+2. Investigate dog-bed, clay-mask, and chocolate-whey return reasons.
+3. Confirm two imputed costs and act on inventory-cover exceptions.
 
-Supporting detail: [brand refund analysis](processed/refund_analysis_by_brand.csv) · [SKU refund analysis](processed/refund_analysis_by_sku.csv)
-
-### Leadership recommendations
-
-1. **Replace allocation assumptions with attribution.** Advertising is 98.7% of reported contribution margin; ingest campaign/ASIN spend and SKU-level storage detail before making product decisions from fully loaded profit.
-2. **Investigate refund erosion.** Start with `PH-BED-MED-GRY`, `GT-MASK-CLAY`, and `PF-WHEY-CHOC`; pair return reasons with contribution-margin impact.
-3. **Close cost and inventory exceptions.** Confirm two imputed landed costs, then review two SKUs below 60 days of cover and slow movers holding more than one year of stock.
-
-Supporting detail: [assumptions and limitations](docs/assumptions_and_limitations.md) · [data-quality register](processed/data_quality_register.csv) · [brand results](processed/brand_profitability.csv) · [SKU results](processed/sku_profitability.csv)
+[Refund detail](processed/refund_analysis_by_sku.csv) · [assumptions](docs/assumptions_and_limitations.md) · [quality register](processed/data_quality_register.csv)
 
 ## 3. First 90 days
 
-```mermaid
-flowchart LR
-    A["Third-party ELT and APIs"] --> B["Bronze: raw JSON"]
-    B --> C["Silver: tolerant views"]
-    C --> D["Gold: stable marts"]
-    B --> E["Controls: drift and null alerts"]
-    C --> E
-```
+QuickBooks, REACH, and Sheets are business sources. BigQuery is the warehouse; dbt transforms, tests, and documents models.
 
-The current third-party ELT remains useful. I would add a BigQuery control layer around it rather than replace it on day one.
+![Resilient BigQuery and dbt model flow](assets/resilient-dbt-model-flow.svg)
 
-| Timing | Build | Outcome |
+| Timing | Priority | Outcome |
 |---|---|---|
-| **Days 1–30: protect ingestion** | Catalog Amazon, QuickBooks, REACH, and Sheet feeds; profile what REACH owns; land raw history plus run metadata; add retries, replay, freshness, drift, volume, and null-rate alerts | Source changes no longer erase evidence or silently reach reports |
-| **Days 31–60: stabilize finance** | Build dbt Silver models with `LAX_*` parsing and approved `COALESCE(new_name, old_name)` fallbacks; add identity exceptions, dbt tests, Gold contracts, and Amazon-to-QuickBooks tie-outs | Stable profitability reporting with source drill-through |
-| **Days 61–90: close gaps** | Add missing advertising, storage, return-reason, PO/receipt, and inventory feeds; use REACH where discovery confirms ownership; assign alert owners and test historical replay | Better SKU economics, inventory actions, and an operating runbook |
+| **Days 1–30: protect** | Catalog Amazon, QuickBooks, REACH, and Sheet feeds; profile REACH; retain raw history/run metadata; add freshness, drift, volume, null, retry, and replay controls | Recoverable feeds and visible source changes |
+| **Days 31–60: stabilize** | Build dbt Silver/Core models with `LAX_*` parsing and approved rename aliases; add identity tests, Gold contracts, and QuickBooks reconciliation | Stable profitability reporting with drill-through |
+| **Days 61–90: close gaps** | Add missing advertising, storage, returns, PO/receipt, and inventory data; use REACH where confirmed; assign owners and test replay | Better SKU economics and an operating runbook |
 
-**Guardrail:** Bronze captures first, but ingestion can still fail from authentication, rate limits, networks, or connector outages. Retries, raw retention, and replay make those failures recoverable. Only Silver/Gold publication is blocked by material quality issues.
+**Drift rule:** Bronze retains changed payloads. Optional keys warn; missing required fields, null spikes, or failed financial tie-outs hold only affected Gold models. API outages still require retries and replay.
 
-**Drift handling:** added optional keys warn; missing required keys, abnormal null spikes, or failed financial tie-outs stop the affected Gold refresh. JSON key order is irrelevant; CSV columns are read by header name, so order-only changes are informational.
+[Detailed plan](docs/automation_90_day_plan.md) · [model](docs/data_model.md) · [drift controls](docs/schema_drift_replay_and_validation.md)
 
-Start with the cost-aware GCP option; use managed connectors when reliability or implementation speed justifies the recurring cost. See [architecture options](docs/architecture_options.md).
+## Key assumptions
 
-## Important assumptions and exceptions
+- Refund signs reverse sales, promotions, fees, units, and COGS.
+- Shared costs remain below reported SKU CM; allocations are estimated.
+- `PH-DENTAL-30CT` uses a 12-unit case pack.
+- `GT-LIP-BALM` and `PH-TOY-ROPE-L` use flagged brand-median costs.
+- `PF-ELECTRO-CITRUS` aliases `PF-ELECTRO-CIT`.
+- Duplicate ASIN `B0GTRLRJDE` is blocked from ASIN-only joins.
 
-- Refunds retain the Amazon signs and reverse sales, promotions, fees, units, and COGS.
-- Advertising, storage, subscription fees, and adjustments remain below reported SKU contribution margin because no reliable SKU key was supplied; a separate net-sales allocation is presented only as an estimated management scenario.
-- `PH-DENTAL-30CT` uses a 12-unit case-pack interpretation from the description.
-- `GT-LIP-BALM` and `PH-TOY-ROPE-L` use temporary brand-median landed costs and remain flagged.
-- `PF-ELECTRO-CITRUS` is treated as a proposed alias of `PF-ELECTRO-CIT` based on the supplied mapping.
-- ASIN `B0GTRLRJDE` maps to two products, so it is blocked from ASIN-only joins.
-
-## Reproduce the analysis
-
-The analysis is reproducible with the four supplied assessment files. Generated outputs are included for reviewers who do not have those source extracts.
+## Reproduce
 
 ```powershell
 pip install -r requirements.txt
@@ -176,10 +145,10 @@ python analysis/identity_resolution_audit.py `
   --transactions processed/settlement_transactions_transformed.csv `
   --output-dir processed
 
-python analysis/allocate_shared_costs.py `
-  --sku-profitability processed/sku_profitability.csv `
-  --platform-overhead processed/platform_overhead.csv `
-  --output-dir processed
-
+python analysis/allocate_shared_costs.py
 python analysis/build_repo_charts.py
 ```
+
+## AI-use disclosure
+
+OpenAI Codex 5.6 Sol assisted with documentation, pipeline-design examples, and illustrative SQL/Python. I reviewed the analysis and remain responsible for its conclusions. Production dbt/SQL would be authored, tested, and adapted by me after inspecting the actual BigQuery datasets, source contracts, and business rules; repository examples are not represented as deployed production code.

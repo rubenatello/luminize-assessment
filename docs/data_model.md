@@ -21,6 +21,8 @@ flowchart LR
     S --> Q["Tests and exceptions"]
 ```
 
+![Resilient BigQuery and dbt model flow](../assets/resilient-dbt-model-flow.svg)
+
 REACH is a confirmed source, but its exact entities and system-of-record responsibilities are not specified. Profile its API/exports, keys, history, and ownership before assigning facts to it.
 
 ## Main tables and keys

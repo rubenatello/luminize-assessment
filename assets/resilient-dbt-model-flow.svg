@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Resilient BigQuery and dbt model flow</title>
+  <desc id="desc">Business sources land in replayable Bronze datasets, dbt converts them to stable Silver and core models, and Gold marts protect finance reporting. Drift controls observe payload keys, null rates, freshness, and financial tie-outs.</desc>
+  <rect width="1200" height="520" fill="#FFFFFF"/>
+  <text x="40" y="42" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#0B2545">Absorb source drift without breaking finance reporting</text>
+  <text x="40" y="68" font-family="Arial, sans-serif" font-size="15" fill="#667085">Capture first • adapt in dbt • keep Gold contracts stable</text>
+
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#2E74B5"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#B42318"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="100" width="190" height="190" rx="10" fill="#F6F8FA" stroke="#D0D5DD"/>
+  <text x="135" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#0B2545">Business sources</text>
+  <text x="135" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#475467">Amazon APIs</text>
+  <text x="135" y="196" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#475467">QuickBooks</text>
+  <text x="135" y="222" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#475467">REACH</text>
+  <text x="135" y="248" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#475467">Google Sheets</text>
+
+  <rect x="280" y="100" width="220" height="190" rx="10" fill="#EAF2F8" stroke="#2E74B5"/>
+  <text x="390" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#0B2545">Bronze: replayable</text>
+  <text x="390" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">raw_amazon</text>
+  <text x="390" y="194" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">raw_quickbooks</text>
+  <text x="390" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">raw_reach • raw_sheets</text>
+  <text x="390" y="250" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">JSON/file + run metadata</text>
+
+  <rect x="550" y="100" width="280" height="190" rx="10" fill="#EAF2F8" stroke="#2E74B5"/>
+  <text x="690" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#0B2545">dbt Silver and core</text>
+  <text x="690" y="168" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">stg_amazon_*: LAX_* + aliases</text>
+  <text x="690" y="194" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">bridge_product_identifier</text>
+  <text x="690" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">fct_marketplace_transaction</text>
+  <text x="690" y="246" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">fct_gl_entry • inventory facts</text>
+
+  <rect x="880" y="100" width="280" height="190" rx="10" fill="#E9F6F1" stroke="#0B7A53"/>
+  <text x="1020" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#0B7A53">Gold: stable contracts</text>
+  <text x="1020" y="174" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">mart_sku_profitability</text>
+  <text x="1020" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">mart_inventory_health</text>
+  <text x="1020" y="232" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">Finance and BI read here</text>
+  <text x="1020" y="256" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">Stable names and definitions</text>
+
+  <g stroke="#2E74B5" stroke-width="4" marker-end="url(#arrow-blue)">
+    <path d="M230 195H272"/>
+    <path d="M500 195H542"/>
+    <path d="M830 195H872"/>
+  </g>
+
+  <rect x="280" y="360" width="550" height="105" rx="10" fill="#FFF8E6" stroke="#B7791F"/>
+  <text x="555" y="393" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#8A5A00">Controls: observe change</text>
+  <text x="555" y="423" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">JSON_KEYS • types • null rates • freshness</text>
+  <text x="555" y="447" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">row/amount totals • identity exceptions • QuickBooks tie-outs</text>
+
+  <rect x="880" y="360" width="280" height="105" rx="10" fill="#FFF4F2" stroke="#B42318"/>
+  <text x="1020" y="393" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#B42318">Publication decision</text>
+  <text x="1020" y="423" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">Warn: optional drift</text>
+  <text x="1020" y="447" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#475467">Hold: required field or tie-out</text>
+
+  <path d="M390 290V350" stroke="#B7791F" stroke-width="3" marker-end="url(#arrow-red)"/>
+  <path d="M690 290V350" stroke="#B7791F" stroke-width="3" marker-end="url(#arrow-red)"/>
+  <path d="M830 412H872" stroke="#B42318" stroke-width="3" marker-end="url(#arrow-red)"/>
+
+  <text x="40" y="500" font-family="Arial, sans-serif" font-size="13" fill="#667085">Bronze preserves the changed payload; dbt adapts the mapping; affected Gold models publish only after controls pass.</text>
+</svg>
+
