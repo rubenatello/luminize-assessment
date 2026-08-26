@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="430" viewBox="0 0 980 430" role="img" aria-labelledby="title desc">
+<title id="title">Q2 unit refund rate by brand</title><desc id="desc">GlowTheory had a 4.9 percent unit refund rate, Peak Fuel 2.8 percent, and PawHaus 2.7 percent.</desc>
+<rect width="980" height="430" fill="white"/><text x="40" y="52" font-family="Arial" fill="#0B2545" font-size="26" font-weight="700">GlowTheory carries the highest refund rate</text><text x="40" y="81" font-family="Arial" fill="#667085" font-size="15">Refunded units divided by ordered units, Q2 2026</text>
+<g font-family="Arial"><text x="175" y="151" fill="#0B2545" font-size="18" text-anchor="end">PawHaus</text><rect x="195" y="116" width="316" height="58" rx="3" fill="#2E74B5"/><text x="527" y="153" fill="#0B2545" font-size="18" font-weight="700">2.7%</text>
+<text x="175" y="241" fill="#0B2545" font-size="18" text-anchor="end">Peak Fuel</text><rect x="195" y="206" width="321" height="58" rx="3" fill="#2E74B5"/><text x="532" y="243" fill="#0B2545" font-size="18" font-weight="700">2.8%</text>
+<text x="175" y="331" fill="#0B2545" font-size="18" text-anchor="end">GlowTheory</text><rect x="195" y="296" width="562" height="58" rx="3" fill="#B7791F"/><text x="773" y="333" fill="#0B2545" font-size="18" font-weight="700">4.9%</text></g>
+</svg>

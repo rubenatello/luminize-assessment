@@ -46,7 +46,23 @@ Contribution margin is net product sales after refunds and promotions, less refe
 2. **Confirm missing landed costs.** Two imputed SKUs represent 2.3% of gross sales; validate their actual cost before product decisions.
 3. **Rebalance inventory.** Review two SKUs below 60 days of cover and slow movers holding more than one year of stock.
 
-Supporting detail: [assumptions and AI use](docs/assumptions_and_ai_use.md) · [data-quality register](processed/data_quality_register.csv) · [brand results](processed/brand_profitability.csv) · [SKU results](processed/sku_profitability.csv)
+Supporting detail: [assumptions and limitations](docs/assumptions_and_limitations.md) · [data-quality register](processed/data_quality_register.csv) · [brand results](processed/brand_profitability.csv) · [SKU results](processed/sku_profitability.csv)
+
+### Refund risk
+
+Refund rate is measured as refunded units divided by ordered units. Contribution impact is the contribution margin reversed by refund rows.
+
+![Q2 unit refund rate by brand](assets/refund-rate-by-brand.svg)
+
+| Brand | Brand refund rate | SKU requiring attention | SKU refund rate | Contribution-margin impact |
+|---|---:|---|---:|---:|
+| GlowTheory | **4.9%** | `GT-MASK-CLAY` | **10.7%** | **$143** reversed; equal to 28.9% of remaining SKU contribution margin |
+| Peak Fuel | **2.8%** | `PF-WHEY-CHOC` | **3.4%** | **$328** reversed, the brand's largest refund impact |
+| PawHaus | **2.7%** | `PH-BED-MED-GRY` | **6.6%** | **$138** reversed; equal to 47.2% of remaining SKU contribution margin |
+
+**Insight:** GlowTheory has the broadest refund pressure, while the PawHaus dog bed is the clearest profitability risk because a modest number of refunds consumes nearly half of its remaining contribution margin. Investigate return reasons, listing expectations, and product quality before changing pricing or advertising.
+
+Supporting detail: [brand refund analysis](processed/refund_analysis_by_brand.csv) · [SKU refund analysis](processed/refund_analysis_by_sku.csv)
 
 ## 3. First 90 days
 
@@ -87,9 +103,3 @@ python analysis/identity_resolution_audit.py `
 
 python analysis/build_repo_charts.py
 ```
-
-## Data and AI disclosure
-
-The raw assessment extracts are excluded. The repository intentionally includes transformed row-level outputs and aggregated results derived from the supplied files so reviewers can inspect the calculations without the original extracts.
-
-AI assisted with file profiling, portions of the Python/SQL drafting, and deliverable formatting. I reviewed the logic, reconciled the outputs to the supplied files, and documented assumptions and exceptions. No external operating or financial data was used in the profitability calculation.

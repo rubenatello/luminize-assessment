@@ -1,4 +1,4 @@
-"""Build the two SVG charts shown in the repository README."""
+"""Build the SVG charts shown in the repository README."""
 
 from __future__ import annotations
 
@@ -106,10 +106,39 @@ def platform_cost_chart() -> str:
     return "\n".join(parts)
 
 
+
+def refund_chart() -> str:
+    rows = sorted(read_csv("refund_analysis_by_brand.csv"), key=lambda r: float(r["unit_refund_rate"]))
+    width, height = 980, 430
+    left, top, plot_width, bar_height, gap = 195, 116, 562, 58, 32
+    maximum = max(float(row["unit_refund_rate"]) for row in rows)
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
+        '<title id="title">Q2 unit refund rate by brand</title>',
+        '<desc id="desc">GlowTheory had the highest unit refund rate at 4.9 percent.</desc>',
+        '<rect width="100%" height="100%" fill="white"/>',
+        svg_text(40, 52, "GlowTheory carries the highest refund rate", fill=NAVY, font_size=26, font_weight="700"),
+        svg_text(40, 81, "Refunded units divided by ordered units, Q2 2026", fill=GRAY, font_size=15),
+    ]
+    for index, row in enumerate(rows):
+        y = top + index * (bar_height + gap)
+        rate = float(row["unit_refund_rate"])
+        bar_width = rate / maximum * plot_width
+        color = "#B7791F" if row["brand"] == "GlowTheory" else BLUE
+        parts.extend([
+            svg_text(left - 20, y + 37, row["brand"], fill=NAVY, font_size=18, text_anchor="end"),
+            f'<rect x="{left}" y="{y}" width="{bar_width:.1f}" height="{bar_height}" rx="3" fill="{color}"/>',
+            svg_text(left + bar_width + 16, y + 37, f"{rate:.1%}", fill=NAVY, font_size=18, font_weight="700"),
+        ])
+    parts.append("</svg>")
+    return "\n".join(parts)
+
+
 def main() -> None:
     ASSETS.mkdir(exist_ok=True)
     (ASSETS / "brand-contribution-margin.svg").write_text(brand_chart(), encoding="utf-8")
     (ASSETS / "contribution-margin-and-platform-costs.svg").write_text(platform_cost_chart(), encoding="utf-8")
+    (ASSETS / "refund-rate-by-brand.svg").write_text(refund_chart(), encoding="utf-8")
 
 
 if __name__ == "__main__":

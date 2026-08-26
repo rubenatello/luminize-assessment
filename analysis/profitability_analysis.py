@@ -267,6 +267,67 @@ def build_inventory(
     return inv.sort_values("fulfillable_days_cover", na_position="last")
 
 
+
+def build_refund_analysis(tx: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Summarize refund frequency and contribution-margin impact by SKU and brand."""
+    keys = ["brand", "canonical_sku", "product_name"]
+    orders = (
+        tx.loc[tx["transaction_type"].eq("Order")]
+        .groupby(keys, as_index=False)
+        .agg(order_units=("quantity", "sum"), order_sales=("gross_sales", "sum"))
+    )
+    refunds = (
+        tx.loc[tx["transaction_type"].eq("Refund")]
+        .groupby(keys, as_index=False)
+        .agg(
+            refund_units=("quantity", lambda s: float(-s.sum())),
+            refund_sales=("gross_sales", lambda s: float(-s.sum())),
+            refund_cm_impact=("contribution_margin", lambda s: float(-s.sum())),
+        )
+    )
+    net_cm = (
+        tx.groupby(keys, as_index=False)
+        .agg(net_contribution_margin=("contribution_margin", "sum"))
+    )
+    sku_refunds = orders.merge(refunds, on=keys, how="left").merge(net_cm, on=keys, how="left")
+    for column in ["refund_units", "refund_sales", "refund_cm_impact"]:
+        sku_refunds[column] = sku_refunds[column].fillna(0)
+    sku_refunds["unit_refund_rate"] = (
+        sku_refunds["refund_units"] / sku_refunds["order_units"]
+    )
+    sku_refunds["revenue_refund_rate"] = (
+        sku_refunds["refund_sales"] / sku_refunds["order_sales"]
+    )
+    sku_refunds["refund_cm_pct_of_net"] = (
+        sku_refunds["refund_cm_impact"] / sku_refunds["net_contribution_margin"]
+    )
+    sku_refunds = sku_refunds.sort_values(
+        ["brand", "refund_units", "unit_refund_rate"], ascending=[True, False, False]
+    )
+
+    brand_refunds = (
+        sku_refunds.groupby("brand", as_index=False)
+        .agg(
+            order_units=("order_units", "sum"),
+            refund_units=("refund_units", "sum"),
+            order_sales=("order_sales", "sum"),
+            refund_sales=("refund_sales", "sum"),
+            refund_cm_impact=("refund_cm_impact", "sum"),
+            net_contribution_margin=("net_contribution_margin", "sum"),
+        )
+    )
+    brand_refunds["unit_refund_rate"] = (
+        brand_refunds["refund_units"] / brand_refunds["order_units"]
+    )
+    brand_refunds["revenue_refund_rate"] = (
+        brand_refunds["refund_sales"] / brand_refunds["order_sales"]
+    )
+    brand_refunds["refund_cm_pct_of_net"] = (
+        brand_refunds["refund_cm_impact"] / brand_refunds["net_contribution_margin"]
+    )
+    return sku_refunds, brand_refunds.sort_values("unit_refund_rate", ascending=False)
+
+
 def data_quality_register(
     mapping: pd.DataFrame,
     po_detail: pd.DataFrame,
@@ -369,6 +430,7 @@ def main() -> None:
         settlements_raw, mapping, costs, brand_median_cost
     )
     inventory = build_inventory(inv_raw, mapping, sku)
+    refund_sku, refund_brand = build_refund_analysis(tx)
     dq = data_quality_register(mapping, po_detail, costs, st, tx, inventory)
 
     net_sales = float(brand["net_sales"].sum())
@@ -427,6 +489,8 @@ def main() -> None:
 
     outputs = {
         "sku_profitability.csv": sku,
+        "refund_analysis_by_sku.csv": refund_sku,
+        "refund_analysis_by_brand.csv": refund_brand,
         "brand_profitability.csv": brand,
         "monthly_brand_profitability.csv": monthly,
         "inventory_health.csv": inventory,
