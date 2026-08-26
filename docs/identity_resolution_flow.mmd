@@ -1,0 +1,22 @@
+flowchart TD
+    A[Raw source row] --> B[Normalize identifiers and preserve raw values]
+    B --> C{Exact canonical SKU?}
+    C -- Yes --> D[A / 100 product match]
+    C -- No --> E{Approved SKU alias?}
+    E -- Yes --> F[A / 95 product match]
+    E -- No --> G{Unique ASIN in marketplace/account/date scope?}
+    G -- Yes --> H[B / 85 provisional product match]
+    G -- No --> I{Approved brand evidence?}
+    I -- Yes --> J[C / 60 brand-only match]
+    I -- No --> K[F / 0 unresolved]
+    D --> L[Assign product_key and brand_key]
+    F --> L
+    H --> M[Review queue and materiality gate]
+    M --> L
+    J --> N[Exception mart; no product_key]
+    K --> O[Quarantine with owner and SLA]
+    L --> P[Finance facts and marts]
+    L --> Q[Identity coverage dashboard]
+    N --> Q
+    O --> Q
+

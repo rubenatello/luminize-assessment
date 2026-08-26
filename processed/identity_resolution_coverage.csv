@@ -1,0 +1,10 @@
+dimension,match_method,confidence_grade,confidence_score,rows,row_pct,net_sales,net_sales_pct,control_action
+product,exact_canonical_sku,A,100,4552,98.87,130989.56,98.98,publish
+product,approved_sku_alias,A,95,52,1.13,1352.37,1.02,publish_monitor_alias_volume
+product,unresolved,F,0,0,0.0,0.0,0.0,quarantine
+brand,approved_product_mapping,A,100,4604,100.0,132341.93,100.0,publish
+brand,prefix_inference,C,60,0,0.0,0.0,0.0,brand_only_review
+brand,unresolved,F,0,0,0.0,0.0,0.0,quarantine
+asin_attribute,unique_enriched_from_sku,B,90,4384,95.22,129173.74,97.61,publish_attribute
+asin_attribute,conflicting_asin,F,0,220,4.78,3168.19,2.39,block_asin_only_join
+asin_attribute,missing,F,0,0,0.0,0.0,0.0,do_not_join

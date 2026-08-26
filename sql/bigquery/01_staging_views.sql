@@ -40,6 +40,9 @@ SELECT
   NULLIF(TRIM(order_id), '') AS order_id,
   SAFE.PARSE_DATE('%Y-%m-%d', posted_date) AS posted_date,
   NULLIF(TRIM(sku), '') AS raw_sku,
+  -- The supplied settlement extract has no ASIN. Keep a typed placeholder so
+  -- future source versions can participate in the same identity contract.
+  CAST(NULL AS STRING) AS raw_asin,
   SAFE_CAST(quantity AS NUMERIC) AS quantity,
   SAFE_CAST(product_sales AS NUMERIC) AS product_sales,
   SAFE_CAST(shipping_credits AS NUMERIC) AS shipping_credits,
@@ -67,4 +70,3 @@ SELECT
   _loaded_at,
   _row_hash
 FROM `your_project.finance.raw_inventory_snapshot`;
-

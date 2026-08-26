@@ -1,0 +1,22 @@
+{
+  "contract_version": "1.0.0",
+  "source": "amazon_selling_partner",
+  "object": "settlements",
+  "owner": "finance_data",
+  "columns": [
+    {"name": "settlement-id", "type": "STRING", "required": true},
+    {"name": "transaction-type", "type": "STRING", "required": true},
+    {"name": "order-id", "type": "STRING", "required": true},
+    {"name": "posted-date", "type": "DATE", "required": true},
+    {"name": "sku", "type": "STRING", "required": true},
+    {"name": "quantity", "type": "INTEGER", "required": true},
+    {"name": "product-sales", "type": "NUMERIC", "required": true},
+    {"name": "shipping-credits", "type": "NUMERIC", "required": true},
+    {"name": "promotional-rebates", "type": "NUMERIC", "required": true},
+    {"name": "selling-fees", "type": "NUMERIC", "required": true},
+    {"name": "fba-fees", "type": "NUMERIC", "required": true},
+    {"name": "other-transaction-fees", "type": "NUMERIC", "required": true},
+    {"name": "other", "type": "NUMERIC", "required": true},
+    {"name": "total", "type": "NUMERIC", "required": true}
+  ]
+}

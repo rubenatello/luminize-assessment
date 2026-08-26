@@ -1,0 +1,3 @@
+exception_type,identifier,affected_skus,affected_brands,rows,net_sales,resolution,owner,status
+ASIN_CONFLICT,B0GTRLRJDE,GT-ROLLER-JADE|PH-BRUSH-DBL,GlowTheory|PawHaus,220,3168.19,Use approved SKU; block ASIN-only join until steward correction,product_data_steward,open
+APPROVED_SKU_ALIAS,PF-ELECTRO-CITRUS,PF-ELECTRO-CIT,Peak Fuel,52,1352.37,Effective-dated approved alias; monitor usage trend,product_data_steward,approved_monitor
