@@ -40,6 +40,26 @@ Contribution margin is net product sales after refunds and promotions, less refe
 
 ![Contribution margin by brand](assets/brand-contribution-margin.svg)
 
+### One transaction, traced from sale to contribution margin
+
+Order `114-1003986-4269335` for `PH-BED-MED-GRY` shows how a profitable sale can become economically fragile before any shared advertising or storage allocation.
+
+| Step | Source field | Amount |
+|---|---|---:|
+| Product sale | Settlement `product_sales` | **$42.99** |
+| Promotion | Settlement `promotional_rebates` | **($4.30)** |
+| Net product sales | Calculated | **$38.69** |
+| Referral fee | Settlement `selling_fees` | **($5.80)** |
+| FBA fulfillment fee | Settlement `fba_fees` | **($12.40)** |
+| Landed COGS | PO weighted landed unit cost | **($19.70)** |
+| **Contribution margin** | Calculated | **$0.79** |
+
+The landed cost is supported by three PO lines totaling 1,300 units: $23,556.00 product cost plus $2,048.80 freight/duty equals $25,604.80, or **$19.696 per sellable unit**.
+
+This transaction remains positive after attributable costs, but only **$0.79** of additional shared cost would erase its margin. The supplied advertising and storage rows have no SKU key, so the analysis does not claim that those costs belong to this order. At quarter level, the SKU generated **$291.44** of contribution margin; any defensible allocation above that amount would make the SKU negative.
+
+Receipts: [transformed settlement rows](processed/settlement_transactions_transformed.csv) · [PO landed-cost summary](processed/po_unit_costs.csv) · [SKU profitability](processed/sku_profitability.csv)
+
 ### Leadership recommendations
 
 1. **Add advertising attribution.** Advertising cost is $50.6K—98.7% of SKU-attributable contribution margin—but the supplied settlement file cannot reliably assign it to SKU.
