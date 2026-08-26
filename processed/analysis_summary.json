@@ -1,0 +1,25 @@
+{
+  "period": {
+    "start": "2026-04-01",
+    "end": "2026-06-30",
+    "days": 91
+  },
+  "gross_sales_net_of_refunds": 135811.98,
+  "net_sales_after_promotions": 132341.93,
+  "contribution_margin": 51242.63,
+  "contribution_margin_pct": 0.387199,
+  "platform_overhead": 56815.34,
+  "adjustment_income": 89.25,
+  "profit_after_platform_overhead": -5483.46,
+  "imputed_cost_sales": 3139.69,
+  "imputed_cost_sales_pct": 0.023118,
+  "imputed_cost_units": 231.0,
+  "settlement_row_count": 4615,
+  "cm_transaction_row_count": 4604,
+  "source_files": {
+    "mapping": "Copy of sku_asin_brand_mapping.csv",
+    "purchase_orders": "Copy of purchase_orders_landed_cost.csv",
+    "inventory": "Copy of inventory_snapshot_2026-06-30.csv",
+    "settlements": "Copy of amazon_settlements_apr-jun_2026.csv"
+  }
+}

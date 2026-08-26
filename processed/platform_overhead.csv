@@ -1,0 +1,5 @@
+transaction_type,rows,signed_amount,classification
+Adjustment,2,89.25,below_cm_other_income
+Advertising Cost,3,-50576.12,below_cm_platform_overhead
+FBA Storage Fee,3,-6119.25,below_cm_platform_overhead
+Subscription Fee,3,-119.97,below_cm_platform_overhead
