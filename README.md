@@ -99,18 +99,18 @@ SKU-less costs are allocated by net-sales share for direction—not reported SKU
 
 Every brand receives that same percentage. This is a breakeven threshold check—not cost attribution—and it cannot change the reported CM ranking. FBA fulfillment is already recorded by SKU and is not reallocated.
 
-| Brand | Net sales | Reported CM | Allocated advertising | Run-rate threshold | Threshold margin |
-|---|---:|---:|---:|---:|---:|
-| GlowTheory | $42,872.51 | $20,548.22 | ($16,384.26) | **$2,142.74** | **5.0%** |
-| Peak Fuel | $55,656.70 | $22,027.05 | ($21,269.90) | **($1,866.77)** | **(3.4%)** |
-| PawHaus | $33,812.72 | $8,667.36 | ($12,921.95) | **($5,848.69)** | **(17.3%)** |
-| **Total** | **$132,341.93** | **$51,242.63** | **($50,576.12)** | **($5,572.71)** | **(4.2%)** |
+| Brand | Net sales | Reported CM | Advertising | Storage | Subscription | Run-rate threshold | Margin |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| GlowTheory | $42,872.51 | $20,548.22 | ($16,384.27) | ($1,982.35) | ($38.87) | **$2,142.73** | **5.0%** |
+| Peak Fuel | $55,656.70 | $22,027.05 | ($21,269.90) | ($2,573.46) | ($50.45) | **($1,866.76)** | **(3.4%)** |
+| PawHaus | $33,812.72 | $8,667.36 | ($12,921.95) | ($1,563.44) | ($30.65) | **($5,848.68)** | **(17.3%)** |
+| **Total** | **$132,341.93** | **$51,242.63** | **($50,576.12)** | **($6,119.25)** | **($119.97)** | **($5,572.71)** | **(4.2%)** |
 
-Brand rows are rounded; unrounded allocations reconcile to $50,576.12.
+Displayed allocated cents use residual rounding so every row and the total foot. Exact unrounded allocations remain in the linked scenario files.
 
 ![Reported contribution margin versus net-sales allocation threshold](assets/reported-vs-allocated-brand-result.svg)
 
-The threshold deducts allocated advertising, storage, and subscription. The $89.25 adjustment is excluded from run-rate decisions and shown only in the reported total. Preferred production drivers are advertised-ASIN spend and SKU cubic-foot-days.
+The threshold excludes the nonrecurring $89.25 adjustment because its accounting purpose is unknown. The reported channel result is **($5,572.71) + $89.25 = ($5,483.46)**. Preferred production drivers are advertised-ASIN spend and SKU cubic-foot-days.
 
 ### Advertising guardrail sensitivity
 
@@ -151,11 +151,17 @@ These are posted-period rates, not order cohorts: Q2 refunds may relate to Q1 or
 | `PF-WHEY-CHOC` | $44.99 | $6.10 | $14.20 | $16.63 | 38.0% |
 | `PH-BED-MED-GRY` | $42.99 | **$12.40** | $19.70 | **$2.56** | **6.1%** |
 
-**Top recommendations**
+### Leadership findings and actions
 
-1. Set a provisional **$38.4K quarterly ad guardrail** for a 5% post-platform margin; reallocate using campaign/ASIN contribution data.
-2. Reprice, reduce dimensional weight, or test FBM for the dog bed; investigate mask and whey return reasons by cohort.
-3. Validate the two imputed costs and receipt-date costing before product or inventory decisions.
+1. **Acquisition economics erase portfolio margin.** The portfolio generates **38.7% CM before advertising**, but $50.6K of advertising consumes 98.7% of that CM and the channel loses $5.6K after storage and subscription. Use a provisional **$38.4K quarterly ad guardrail** for a 5% post-platform margin, or require an equivalent $12.2K contribution improvement.
+2. **PawHaus needs an economic decision.** It has the lowest reported brand CM rate at **25.6%** and reaches **(17.3%)** under the proportional threshold check. The dog bed earns only 6.1% CM before advertising because FBA consumes 28.8% of price. Reprice, reduce dimensional weight, test FBM, or exit products that cannot clear a defined margin floor.
+3. **Advertising attribution determines what to cut.** The supplied data shows advertising at **38.2% of net sales**, but not whether losses are broad or concentrated in a few ASINs. Ingest campaign and advertised-ASIN spend, then manage contribution after advertising—not ROAS alone.
+
+**Validation next steps**
+
+- Match returns to order cohorts and add reason, disposition, reimbursement, and processing-cost data.
+- Replace the two imputed costs with approved costs and add receipt-layer inventory costing.
+- Add historical inventory movements before making replenishment or stock-health decisions.
 
 [Refund detail](processed/refund_analysis_by_sku.csv) · [assumptions](docs/assumptions_and_limitations.md) · [quality register](processed/data_quality_register.csv)
 
