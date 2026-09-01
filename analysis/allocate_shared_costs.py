@@ -125,12 +125,12 @@ def main() -> None:
     scenario.to_csv(
         args.output_dir / "allocated_profitability_scenario_by_sku.csv",
         index=False,
-        float_format="%.8f",
+        float_format="%.2f",
     )
     brand.to_csv(
         args.output_dir / "allocated_profitability_scenario_by_brand.csv",
         index=False,
-        float_format="%.8f",
+        float_format="%.2f",
     )
 
     summary = {
