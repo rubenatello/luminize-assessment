@@ -23,6 +23,40 @@ COST_TYPES = {
 }
 
 
+def build_two_decimal_export(frame: pd.DataFrame) -> pd.DataFrame:
+    """Round allocations to cents while preserving each shared-cost total."""
+    out = frame.copy()
+    allocation_columns = list(COST_TYPES.values())
+
+    for column in allocation_columns:
+        exact = out[column].copy()
+        rounded = exact.round(2)
+        target = round(float(exact.sum()), 2)
+        residual_cents = int(round((target - float(rounded.sum())) * 100))
+
+        if residual_cents:
+            remainders = exact - rounded
+            order = remainders.sort_values(
+                ascending=residual_cents < 0
+            ).index.tolist()
+            step = 0.01 if residual_cents > 0 else -0.01
+            for offset in range(abs(residual_cents)):
+                rounded.loc[order[offset % len(order)]] += step
+
+        out[column] = rounded
+
+    out["run_rate_threshold_result"] = (
+        out["reported_contribution_margin"]
+        - out["allocated_advertising"]
+        - out["allocated_fba_storage"]
+        - out["allocated_subscription"]
+    )
+    out["run_rate_threshold_margin_pct"] = (
+        out["run_rate_threshold_result"] / out["net_sales"]
+    )
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -122,12 +156,14 @@ def main() -> None:
             f"expected={expected_result:.2f}"
         )
 
-    scenario.to_csv(
+    scenario_export = build_two_decimal_export(scenario)
+    brand_export = build_two_decimal_export(brand)
+    scenario_export.to_csv(
         args.output_dir / "allocated_profitability_scenario_by_sku.csv",
         index=False,
         float_format="%.2f",
     )
-    brand.to_csv(
+    brand_export.to_csv(
         args.output_dir / "allocated_profitability_scenario_by_brand.csv",
         index=False,
         float_format="%.2f",
