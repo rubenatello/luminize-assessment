@@ -1,25 +1,25 @@
 brand,canonical_sku,product_name,net_sales,reported_contribution_margin,reported_contribution_margin_pct,net_sales_allocation_share,allocated_advertising,allocated_fba_storage,allocated_subscription,run_rate_threshold_result,run_rate_threshold_margin_pct,allocation_method,is_estimated
 GlowTheory,GT-SERUM-VITC,GlowTheory Vitamin C Serum 30ml,13723.74,7521.26,0.55,0.10,5244.70,634.56,12.44,1629.56,0.12,net_sales_share,True
-GlowTheory,GT-SERUM-HA,GlowTheory Hyaluronic Acid Serum 30ml,9183.74,4853.38,0.53,0.07,3509.68,424.64,8.33,910.74,0.10,net_sales_share,True
-GlowTheory,GT-MOIST-50ML,GlowTheory Daily Moisturizer 50ml,5386.48,2419.97,0.45,0.04,2058.51,249.06,4.88,107.51,0.02,net_sales_share,True
-GlowTheory,GT-SPF30-TINT,GlowTheory Tinted SPF 30 Sunscreen 50ml,4980.27,2063.16,0.41,0.04,1903.27,230.28,4.51,-74.91,-0.02,net_sales_share,True
-GlowTheory,GT-EYE-CREAM,GlowTheory Restorative Eye Cream 15ml,3160.49,1620.41,0.51,0.02,1207.82,146.14,2.87,263.59,0.08,net_sales_share,True
-GlowTheory,GT-CLEANSE-150,GlowTheory Gentle Foaming Cleanser 150ml,2788.02,1046.19,0.38,0.02,1065.48,128.91,2.53,-150.72,-0.05,net_sales_share,True
+GlowTheory,GT-SERUM-HA,GlowTheory Hyaluronic Acid Serum 30ml,9183.74,4853.38,0.53,0.07,3509.68,424.64,8.33,910.73,0.10,net_sales_share,True
+GlowTheory,GT-MOIST-50ML,GlowTheory Daily Moisturizer 50ml,5386.48,2419.97,0.45,0.04,2058.51,249.06,4.88,107.52,0.02,net_sales_share,True
+GlowTheory,GT-SPF30-TINT,GlowTheory Tinted SPF 30 Sunscreen 50ml,4980.27,2063.16,0.41,0.04,1903.27,230.28,4.51,-74.90,-0.02,net_sales_share,True
+GlowTheory,GT-EYE-CREAM,GlowTheory Restorative Eye Cream 15ml,3160.49,1620.41,0.51,0.02,1207.82,146.14,2.87,263.58,0.08,net_sales_share,True
+GlowTheory,GT-CLEANSE-150,GlowTheory Gentle Foaming Cleanser 150ml,2788.02,1046.19,0.38,0.02,1065.48,128.91,2.53,-150.73,-0.05,net_sales_share,True
 GlowTheory,GT-ROLLER-JADE,GlowTheory Jade Facial Roller,1344.42,522.28,0.39,0.01,513.79,62.16,1.22,-54.89,-0.04,net_sales_share,True
-GlowTheory,GT-MASK-CLAY,GlowTheory Detox Clay Mask 100g,2080.58,495.71,0.24,0.02,795.12,96.20,1.89,-397.49,-0.19,net_sales_share,True
-GlowTheory,GT-LIP-BALM,GlowTheory Repair Lip Balm SPF 15,224.77,5.85,0.03,0.00,85.90,10.39,0.20,-90.65,-0.40,net_sales_share,True
-PawHaus,PH-CHEW-BULLY-6,PawHaus Bully Stick Chews 6in 8pk,8601.07,2567.15,0.30,0.06,3287.01,397.70,7.80,-1125.35,-0.13,net_sales_share,True
+GlowTheory,GT-MASK-CLAY,GlowTheory Detox Clay Mask 100g,2080.58,495.71,0.24,0.02,795.12,96.20,1.89,-397.50,-0.19,net_sales_share,True
+GlowTheory,GT-LIP-BALM,GlowTheory Repair Lip Balm SPF 15,224.77,5.85,0.03,0.00,85.90,10.39,0.20,-90.64,-0.40,net_sales_share,True
+PawHaus,PH-CHEW-BULLY-6,PawHaus Bully Stick Chews 6in 8pk,8601.07,2567.15,0.30,0.06,3287.00,397.70,7.80,-1125.35,-0.13,net_sales_share,True
 PawHaus,PH-TREAT-SALMON,PawHaus Salmon Training Treats 16oz,7261.67,2172.00,0.30,0.05,2775.14,335.77,6.58,-945.49,-0.13,net_sales_share,True
-PawHaus,PH-DENTAL-30CT,PawHaus Dental Chews 30ct,5603.00,1783.99,0.32,0.04,2141.26,259.07,5.08,-621.41,-0.11,net_sales_share,True
+PawHaus,PH-DENTAL-30CT,PawHaus Dental Chews 30ct,5603.00,1783.99,0.32,0.04,2141.25,259.07,5.08,-621.41,-0.11,net_sales_share,True
 PawHaus,PH-SHAMPOO-OAT,PawHaus Oatmeal Dog Shampoo 16oz,2930.92,1033.25,0.35,0.02,1120.09,135.52,2.66,-225.02,-0.08,net_sales_share,True
 PawHaus,PH-BRUSH-DBL,PawHaus Double-Sided Grooming Brush,1823.77,642.98,0.35,0.01,696.98,84.33,1.65,-139.98,-0.08,net_sales_share,True
 PawHaus,PH-BED-MED-GRY,PawHaus Orthopedic Dog Bed Medium Grey,4776.16,291.44,0.06,0.04,1825.27,220.84,4.33,-1759.00,-0.37,net_sales_share,True
 PawHaus,PH-TOY-ROPE-L,PawHaus Braided Rope Toy Large,2816.13,176.55,0.06,0.02,1076.22,130.21,2.55,-1032.43,-0.37,net_sales_share,True
 Peak Fuel,PF-WHEY-CHOC,Peak Fuel Whey Protein Chocolate 2lb,17370.55,6603.71,0.38,0.13,6638.37,803.18,15.75,-853.59,-0.05,net_sales_share,True
 Peak Fuel,PF-CREATINE-300,Peak Fuel Creatine Monohydrate 300g,10058.39,4516.69,0.45,0.08,3843.94,465.08,9.12,198.55,0.02,net_sales_share,True
-Peak Fuel,PF-WHEY-VAN,Peak Fuel Whey Protein Vanilla 2lb,10815.53,4172.38,0.39,0.08,4133.29,500.09,9.80,-470.81,-0.04,net_sales_share,True
-Peak Fuel,PF-PREWKT-BERRY,Peak Fuel Pre-Workout Mixed Berry 30srv,6334.02,2722.68,0.43,0.05,2420.62,292.87,5.74,3.44,0.00,net_sales_share,True
+Peak Fuel,PF-WHEY-VAN,Peak Fuel Whey Protein Vanilla 2lb,10815.53,4172.38,0.39,0.08,4133.29,500.09,9.80,-470.80,-0.04,net_sales_share,True
+Peak Fuel,PF-PREWKT-BERRY,Peak Fuel Pre-Workout Mixed Berry 30srv,6334.02,2722.68,0.43,0.05,2420.62,292.88,5.74,3.44,0.00,net_sales_share,True
 Peak Fuel,PF-BCAA-LEMON,Peak Fuel BCAA Lemon Lime 40srv,3076.07,1322.70,0.43,0.02,1175.56,142.23,2.79,2.12,0.00,net_sales_share,True
-Peak Fuel,PF-VEGAN-CHOC,Peak Fuel Vegan Protein Chocolate 2lb,3403.13,957.92,0.28,0.03,1300.55,157.35,3.08,-503.07,-0.15,net_sales_share,True
+Peak Fuel,PF-VEGAN-CHOC,Peak Fuel Vegan Protein Chocolate 2lb,3403.13,957.92,0.28,0.03,1300.55,157.36,3.08,-503.07,-0.15,net_sales_share,True
 Peak Fuel,PF-ELECTRO-CIT,Peak Fuel Electrolyte Powder Citrus 60srv,2559.61,929.77,0.36,0.02,978.19,118.35,2.32,-169.09,-0.07,net_sales_share,True
 Peak Fuel,PF-SHAKER-28,Peak Fuel Shaker Bottle 28oz,2039.40,801.20,0.39,0.02,779.38,94.30,1.85,-74.33,-0.04,net_sales_share,True
