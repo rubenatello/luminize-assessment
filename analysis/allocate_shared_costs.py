@@ -26,9 +26,12 @@ COST_TYPES = {
 def build_two_decimal_export(frame: pd.DataFrame) -> pd.DataFrame:
     """Round allocations to cents while preserving each shared-cost total."""
     out = frame.copy()
-    allocation_columns = list(COST_TYPES.values())
+    reconciled_money_columns = [
+        "reported_contribution_margin",
+        *COST_TYPES.values(),
+    ]
 
-    for column in allocation_columns:
+    for column in reconciled_money_columns:
         exact = out[column].copy()
         rounded = exact.round(2)
         target = round(float(exact.sum()), 2)
