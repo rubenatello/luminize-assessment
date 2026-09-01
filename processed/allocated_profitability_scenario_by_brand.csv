@@ -1,4 +1,4 @@
 brand,net_sales,reported_contribution_margin,allocated_advertising,allocated_fba_storage,allocated_subscription,run_rate_threshold_result,reported_contribution_margin_pct,run_rate_threshold_margin_pct,allocation_method,is_estimated
-Peak Fuel,55656.70,22027.05,21269.90,2573.46,50.45,-1866.77,0.40,-0.03,net_sales_share,True
-GlowTheory,42872.51,20548.22,16384.26,1982.35,38.86,2142.74,0.48,0.05,net_sales_share,True
-PawHaus,33812.72,8667.36,12921.95,1563.44,30.65,-5848.69,0.26,-0.17,net_sales_share,True
+Peak Fuel,55656.70,22027.05,21269.90,2573.46,50.45,-1866.76,0.40,-0.03,net_sales_share,True
+GlowTheory,42872.51,20548.22,16384.27,1982.35,38.87,2142.73,0.48,0.05,net_sales_share,True
+PawHaus,33812.72,8667.36,12921.95,1563.44,30.65,-5848.68,0.26,-0.17,net_sales_share,True
