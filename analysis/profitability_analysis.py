@@ -512,8 +512,24 @@ def main() -> None:
         "data_quality_register.csv": dq,
         "settlement_transactions_transformed.csv": tx,
     }
+    reporting_outputs = {
+        "sku_profitability.csv",
+        "refund_analysis_by_sku.csv",
+        "refund_analysis_by_brand.csv",
+        "brand_profitability.csv",
+        "monthly_brand_profitability.csv",
+        "inventory_health.csv",
+        "profit_bridge.csv",
+        "platform_overhead.csv",
+    }
     for name, frame in outputs.items():
-        frame.to_csv(args.output_dir / name, index=False, date_format="%Y-%m-%d")
+        float_format = "%.2f" if name in reporting_outputs else None
+        frame.to_csv(
+            args.output_dir / name,
+            index=False,
+            date_format="%Y-%m-%d",
+            float_format=float_format,
+        )
     (args.output_dir / "analysis_summary.json").write_text(
         json.dumps(summary, indent=2), encoding="utf-8"
     )
